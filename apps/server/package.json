@@ -1,0 +1,26 @@
+{
+  "name": "@filmstudio/server",
+  "version": "0.0.0",
+  "private": true,
+  "bin": {
+    "filmstudio": "./bin/filmstudio.js"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/cli.ts serve --port 4310",
+    "start": "node src/cli.ts serve"
+  },
+  "dependencies": {
+    "@filmstudio/shared": "workspace:*",
+    "@hono/node-server": "^1.14.0",
+    "commander": "^14.0.0",
+    "hono": "^4.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  }
+}
