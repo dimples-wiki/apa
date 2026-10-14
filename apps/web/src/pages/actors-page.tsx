@@ -8,12 +8,12 @@ import { useApi } from "@/hooks/use-api";
 import { api } from "@/lib/api";
 
 const accentStyles: Record<string, string> = {
-  indigo: "bg-indigo-500/15 text-indigo-300 ring-indigo-500/25",
-  cyan: "bg-cyan-500/15 text-cyan-300 ring-cyan-500/25",
-  amber: "bg-amber-500/15 text-amber-300 ring-amber-500/25",
-  rose: "bg-rose-500/15 text-rose-300 ring-rose-500/25",
-  emerald: "bg-emerald-500/15 text-emerald-300 ring-emerald-500/25",
-  violet: "bg-violet-500/15 text-violet-300 ring-violet-500/25",
+  indigo: "bg-indigo-500/15 text-indigo-700 ring-indigo-500/25 dark:text-indigo-300",
+  cyan: "bg-cyan-500/15 text-cyan-700 ring-cyan-500/25 dark:text-cyan-300",
+  amber: "bg-amber-500/15 text-amber-700 ring-amber-500/25 dark:text-amber-300",
+  rose: "bg-rose-500/15 text-rose-700 ring-rose-500/25 dark:text-rose-300",
+  emerald: "bg-emerald-500/15 text-emerald-700 ring-emerald-500/25 dark:text-emerald-300",
+  violet: "bg-violet-500/15 text-violet-700 ring-violet-500/25 dark:text-violet-300",
 };
 
 function ActorCard({ actor }: { actor: Actor }) {
