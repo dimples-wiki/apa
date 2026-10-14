@@ -10,27 +10,40 @@ import {
 } from "@/components/layout/list-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { coverGrid, grainTexture, sceneHue } from "@/lib/utils";
 import { useApi } from "@/hooks/use-api";
 import { api } from "@/lib/api";
 
-const coverGrid =
-  "[background-image:linear-gradient(to_right,var(--grid-line)_1px,transparent_1px),linear-gradient(to_bottom,var(--grid-line)_1px,transparent_1px)] [background-size:24px_24px]";
-
-function SceneCard({ scene }: { scene: Scene }) {
+function SceneCard({ scene, index }: { scene: Scene; index: number }) {
   return (
     <Card className="group gap-0 overflow-hidden py-0 transition-colors hover:border-foreground/25">
-      <CardHeader className="relative h-16 border-b p-3">
+      <CardHeader className="relative h-20 overflow-hidden border-b p-3">
+        <div
+          className="absolute inset-0"
+          style={{ backgroundColor: `oklch(0.9 0.04 ${sceneHue(scene.timeOfDay, index)})` }}
+        />
+        <div
+          className="absolute inset-0 hidden dark:block"
+          style={{
+            backgroundColor: `oklch(0.16 0.035 ${sceneHue(scene.timeOfDay, index)})`,
+            backgroundImage: `radial-gradient(160px 90px at 75% 110%, oklch(0.45 0.09 ${sceneHue(scene.timeOfDay, index)}), transparent 75%)`,
+          }}
+        />
         <div className={`absolute inset-0 ${coverGrid}`} />
-        <span className="absolute right-2 bottom-0 text-4xl font-semibold tracking-tight text-foreground/[0.06] select-none">
+        <div className="absolute inset-0 opacity-[0.12] mix-blend-overlay" style={grainTexture} />
+        <span
+          className="absolute bottom-1.5 left-3 text-[44px] leading-none font-semibold tracking-tight select-none [mask-image:linear-gradient(to_bottom,black_55%,transparent_98%)]"
+          style={{ color: "var(--cover-word)" }}
+        >
           {scene.name.slice(0, 1)}
         </span>
-        <span className="relative w-fit rounded border bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">
+        <span className="absolute top-2.5 right-3 rounded border bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground backdrop-blur-sm">
           {scene.timeOfDay}
         </span>
       </CardHeader>
       <CardContent className="space-y-1.5 p-4">
         <h3 className="truncate text-[15px] font-medium tracking-tight">{scene.name}</h3>
-        <p className="line-clamp-2 min-h-10 text-[12px] leading-5 text-muted-foreground">
+        <p className="line-clamp-2 min-h-10 text-[12px] leading-5 text-muted-foreground [text-wrap:pretty]">
           {scene.description}
         </p>
       </CardContent>
@@ -59,28 +72,35 @@ export function ScenesPage() {
         title="场景"
         description="项目共用的场景素材库"
         actions={
-          <Button size="sm" className="gap-1.5">
+          <Button size="sm" className="gap-1.5" disabled={Boolean(error)}>
             <Plus className="size-3.5" />
             新建场景
           </Button>
         }
       />
-      <ListToolbar
-        placeholder="搜索场景…"
-        unit="个场景"
-        count={error || loading ? null : (filtered?.length ?? 0)}
-        query={query}
-        onQueryChange={setQuery}
-      />
+      {!error && (
+        <ListToolbar
+          placeholder="搜索场景…"
+          unit="个场景"
+          count={error ? null : loading ? null : (filtered?.length ?? 0)}
+          countHidden={Boolean(error)}
+          query={query}
+          onQueryChange={setQuery}
+        />
+      )}
       <ListBody>
         {loading ? (
-          <CardGridSkeleton variant="scene" count={4} />
+          <CardGridSkeleton
+            variant="scene"
+            count={4}
+            cols="sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          />
         ) : error ? (
           <ErrorState onRetry={reload} />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filtered?.map((scene) => (
-              <SceneCard key={scene.id} scene={scene} />
+            {filtered?.map((scene, index) => (
+              <SceneCard key={scene.id} scene={scene} index={index} />
             ))}
           </div>
         )}

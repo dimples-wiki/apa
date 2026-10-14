@@ -1,10 +1,11 @@
 import { spawn } from "node:child_process";
 import { Command } from "commander";
+import { APP_VERSION } from "@filmstudio/shared";
 import { startServer } from "./server.ts";
 
 const program = new Command();
 
-program.name("filmstudio").description("FilmStudio — AI 影视创作平台").version("0.0.0");
+program.name("filmstudio").description("FilmStudio — AI 影视创作平台").version(APP_VERSION);
 
 program
   .command("serve")

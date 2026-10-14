@@ -1,6 +1,7 @@
 import { Clapperboard, FolderKanban, Mountain, Settings, Shirt, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { NavLink, useLocation } from "react-router";
+import { useSidebar } from "@/components/ui/sidebar";
 import { useApi } from "@/hooks/use-api";
 import { api } from "@/lib/api";
 import {
@@ -33,7 +34,7 @@ function useNavItems(): NavItem[] {
   const costumes = useApi(api.costumes);
 
   return [
-    { title: "项目列表", to: "/projects", icon: FolderKanban, count: projects.data?.length },
+    { title: "项目", to: "/projects", icon: FolderKanban, count: projects.data?.length },
     { title: "演员", to: "/actors", icon: Users, count: actors.data?.length },
     { title: "场景", to: "/scenes", icon: Mountain, count: scenes.data?.length },
     { title: "服饰", to: "/costumes", icon: Shirt, count: costumes.data?.length },
@@ -43,7 +44,12 @@ function useNavItems(): NavItem[] {
 function NavRow({ item, active }: { item: NavItem; active: boolean }) {
   return (
     <SidebarMenuItem className="relative">
-      <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
+      <SidebarMenuButton
+        asChild
+        isActive={active}
+        tooltip={item.title}
+        className="relative data-[active=true]:bg-foreground/18 data-[active=true]:text-foreground data-[active=true]:before:absolute data-[active=true]:before:top-1/2 data-[active=true]:before:left-0 data-[active=true]:before:h-5 data-[active=true]:before:w-1 data-[active=true]:before:-translate-y-1/2 data-[active=true]:before:rounded-full data-[active=true]:before:bg-foreground data-[active=true]:before:content-['']"
+      >
         <NavLink to={item.to}>
           <item.icon />
           <span>{item.title}</span>
@@ -62,14 +68,21 @@ function NavRow({ item, active }: { item: NavItem; active: boolean }) {
 export function AppSidebar() {
   const items = useNavItems();
   const { pathname } = useLocation();
+  const { state, setOpen } = useSidebar();
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <div className="flex items-center justify-between gap-1 px-2 py-1 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+        <div className="flex items-center justify-between gap-1 px-2 py-1 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-1 group-data-[collapsible=icon]:px-0">
           <SidebarMenuButton
             size="lg"
-            className="pointer-events-none group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-0"
+            onClick={state === "collapsed" ? () => setOpen(true) : undefined}
+            title={state === "collapsed" ? "展开侧边栏" : undefined}
+            className={
+              state === "collapsed"
+                ? "group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-0"
+                : "pointer-events-none"
+            }
             tooltip="FilmStudio"
           >
             <div className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-md bg-foreground text-background">
@@ -77,7 +90,7 @@ export function AppSidebar() {
             </div>
             <span className="text-[15px] font-semibold tracking-tight">FilmStudio</span>
           </SidebarMenuButton>
-          <SidebarTrigger className="size-7 shrink-0 text-sidebar-foreground/60 group-data-[collapsible=icon]:hidden" />
+          <SidebarTrigger className="size-7 shrink-0 text-sidebar-foreground/60 group-data-[collapsible=icon]:text-sidebar-foreground/40" />
         </div>
       </SidebarHeader>
 
@@ -97,7 +110,12 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={pathname === "/settings"} tooltip="系统设置">
+            <SidebarMenuButton
+              asChild
+              isActive={pathname === "/settings"}
+              tooltip="系统设置"
+              className="relative data-[active=true]:bg-foreground/18 data-[active=true]:text-foreground data-[active=true]:before:absolute data-[active=true]:before:top-1/2 data-[active=true]:before:left-0 data-[active=true]:before:h-5 data-[active=true]:before:w-1 data-[active=true]:before:-translate-y-1/2 data-[active=true]:before:rounded-full data-[active=true]:before:bg-foreground data-[active=true]:before:content-['']"
+            >
               <NavLink to="/settings">
                 <Settings />
                 <span>系统设置</span>

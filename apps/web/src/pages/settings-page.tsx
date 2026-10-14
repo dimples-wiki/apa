@@ -1,8 +1,10 @@
+import { ChevronRight } from "lucide-react";
 import { useState } from "react";
-import { ChevronRight, Moon } from "lucide-react";
 import type { ReactNode } from "react";
+import { APP_VERSION } from "@filmstudio/shared";
+import { getTheme, setTheme, type Theme } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/layout/page-header";
-import { Switch } from "@/components/ui/switch";
 
 function Section({
   title,
@@ -36,21 +38,30 @@ function Row({ label, hint, control }: { label: string; hint?: string; control?:
   );
 }
 
-function ValueLink({ value }: { value: string }) {
+function ValueLink({ value, tone = "idle" }: { value: string; tone?: "idle" | "off" }) {
   return (
-    <span className="flex shrink-0 items-center gap-1 text-[12px] text-muted-foreground">
+    <span className="flex shrink-0 items-center gap-1.5 text-[12px] text-muted-foreground">
+      <span
+        className={`size-1.5 rounded-full ${tone === "off" ? "bg-zinc-400/70 dark:bg-zinc-500/70" : "bg-amber-400 dark:bg-amber-500/80"}`}
+      />
       {value}
       <ChevronRight className="size-3.5" />
     </span>
   );
 }
 
-export function SettingsPage() {
-  const [dark, setDark] = useState(document.documentElement.classList.contains("dark"));
+const themeOptions: { key: Theme; label: string }[] = [
+  { key: "light", label: "浅色" },
+  { key: "dark", label: "深色" },
+  { key: "system", label: "跟随系统" },
+];
 
-  function toggleDark(enabled: boolean) {
-    document.documentElement.classList.toggle("dark", enabled);
-    setDark(enabled);
+export function SettingsPage() {
+  const [theme, setThemeState] = useState<Theme>(getTheme);
+
+  function changeTheme(next: Theme) {
+    setTheme(next);
+    setThemeState(next);
   }
 
   return (
@@ -59,12 +70,25 @@ export function SettingsPage() {
       <div className="flex-1 space-y-8 px-8 pb-10">
         <Section title="外观" description="界面主题与显示偏好">
           <Row
-            label="深色模式"
-            hint="使用深色界面，关闭后切换为浅色"
+            label="主题"
+            hint="深色、浅色或跟随系统自动切换"
             control={
-              <div className="flex shrink-0 items-center gap-2">
-                <Moon className="size-3.5 text-foreground/70" />
-                <Switch checked={dark} onCheckedChange={toggleDark} />
+              <div className="flex shrink-0 items-center gap-0.5 rounded-md border bg-foreground/5 p-0.5">
+                {themeOptions.map((opt) => (
+                  <button
+                    key={opt.key}
+                    type="button"
+                    onClick={() => changeTheme(opt.key)}
+                    className={cn(
+                      "h-6.5 rounded-sm px-2.5 text-[12px] transition-colors",
+                      theme === opt.key
+                        ? "bg-foreground text-background"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
               </div>
             }
           />
@@ -74,12 +98,12 @@ export function SettingsPage() {
           <Row
             label="生成模型"
             hint="用于剧本、形象与场景生成"
-            control={<ValueLink value="未接入" />}
+            control={<ValueLink value="未接入" tone="off" />}
           />
           <Row
             label="API Key"
             hint="访问密钥，仅保存在本机"
-            control={<ValueLink value="未设置" />}
+            control={<ValueLink value="未设置" tone="off" />}
           />
         </Section>
 
@@ -87,10 +111,12 @@ export function SettingsPage() {
           <Row
             label="版本"
             control={
-              <span className="shrink-0 text-[12px] tabular-nums text-muted-foreground">0.0.0</span>
+              <span className="shrink-0 text-[12px] tabular-nums text-muted-foreground">
+                {APP_VERSION}
+              </span>
             }
           />
-          <Row label="数据存储" control={<ValueLink value="本机存储" />} />
+          <Row label="数据存储" control={<ValueLink value="本机存储" tone="off" />} />
         </Section>
       </div>
     </div>

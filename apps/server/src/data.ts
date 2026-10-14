@@ -22,6 +22,16 @@ export const projects: Project[] = [
     updatedAt: "2026-10-11T14:30:00.000Z",
   },
   {
+    id: "p-006",
+    name: "春潮",
+    logline: "小镇游泳队的天才少女与固执教练，向全国冠军发起最后一次冲击。",
+    genre: "运动励志",
+    status: "writing",
+    progress: 21,
+    members: ["江野", "顾云舟"],
+    updatedAt: "2026-10-10T16:20:00.000Z",
+  },
+  {
     id: "p-003",
     name: "弄堂风云",
     logline: "九十年代上海弄堂里，两家理发店三代人的恩怨与和解。",
@@ -51,23 +61,13 @@ export const projects: Project[] = [
     members: ["段飞白", "许知意", "沈青"],
     updatedAt: "2026-09-28T08:00:00.000Z",
   },
-  {
-    id: "p-006",
-    name: "春潮",
-    logline: "小镇游泳队的天才少女与固执教练，向全国冠军发起最后一次冲击。",
-    genre: "运动励志",
-    status: "writing",
-    progress: 21,
-    members: ["江野", "顾云舟"],
-    updatedAt: "2026-10-10T16:20:00.000Z",
-  },
 ];
 
 export const actors: Actor[] = [
   {
     id: "a-001",
     name: "沈青",
-    persona: "30 岁左右，眉眼冷峻的刑侦专家形象，声线低沉有磁性",
+    persona: "眉眼冷峻的刑侦专家，惯用低沉嗓音压住全场；长于审讯对手戏",
     tags: ["悬疑", "正剧"],
     projectCount: 2,
     accent: "indigo",
@@ -76,7 +76,7 @@ export const actors: Actor[] = [
   {
     id: "a-002",
     name: "白鹿",
-    persona: "22 岁，清冷少女感，适合科幻与青春题材，肢体表现力强",
+    persona: "清冷少女感，台词干净利落；在失重与奔跑戏里肢体控制力惊人",
     tags: ["科幻", "青春"],
     projectCount: 1,
     accent: "cyan",
@@ -85,7 +85,7 @@ export const actors: Actor[] = [
   {
     id: "a-003",
     name: "陆离",
-    persona: "35 岁，古装贵公子气质，武打动作功底扎实",
+    persona: "古装贵公子气质，一柄长剑耍得行云流水，眼神戏尤其出彩",
     tags: ["古装", "武侠"],
     projectCount: 3,
     accent: "amber",
@@ -94,7 +94,7 @@ export const actors: Actor[] = [
   {
     id: "a-004",
     name: "苏晚晴",
-    persona: "28 岁，江南温婉气质，擅长年代戏与家庭伦理剧",
+    persona: "江南梅雨养出来的温婉声线，一句沪语问候就能立住角色",
     tags: ["年代", "家庭"],
     projectCount: 2,
     accent: "rose",
@@ -103,7 +103,7 @@ export const actors: Actor[] = [
   {
     id: "a-005",
     name: "段飞白",
-    persona: "40 岁，沧桑硬汉形象，台词功底深厚，适合刑侦与军旅",
+    persona: "满脸风霜的硬汉，不用台词也能演完整场内心戏",
     tags: ["刑侦", "硬汉"],
     projectCount: 4,
     accent: "emerald",
@@ -112,7 +112,7 @@ export const actors: Actor[] = [
   {
     id: "a-006",
     name: "林小满",
-    persona: "19 岁，元气少女音色，喜剧节奏感好，适合奇幻轻喜剧",
+    persona: "自带笑点的元气少女音色，接梗速度比谁都快",
     tags: ["奇幻", "喜剧"],
     projectCount: 1,
     accent: "violet",
@@ -180,7 +180,7 @@ export const costumes: Costume[] = [
     id: "c-003",
     name: "九十年代女装套装",
     description: "碎花衬衫配高腰西裤，一副细框眼镜，还原九十年代都市女性日常。",
-    era: "1990s",
+    era: "九十年代",
     tags: ["女装", "年代"],
     createdAt: "2026-08-25T09:00:00.000Z",
   },
