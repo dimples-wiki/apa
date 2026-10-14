@@ -1,7 +1,5 @@
 import type { Actor, Costume, Project, Scene } from "@filmstudio/shared";
 
-const now = "2026-10-12T09:00:00.000Z";
-
 export const projects: Project[] = [
   {
     id: "p-001",
@@ -11,7 +9,7 @@ export const projects: Project[] = [
     status: "shooting",
     progress: 62,
     members: ["沈青", "陆离", "顾云舟"],
-    updatedAt: now,
+    updatedAt: "2026-10-12T09:00:00.000Z",
   },
   {
     id: "p-002",
@@ -19,9 +17,9 @@ export const projects: Project[] = [
     logline: "末日地球最后一位星际摆渡人，驾驶旧飞船护送三千沉睡者前往新家园。",
     genre: "科幻",
     status: "post",
-    progress: 85,
+    progress: 84,
     members: ["白鹿", "程一苇"],
-    updatedAt: now,
+    updatedAt: "2026-10-11T14:30:00.000Z",
   },
   {
     id: "p-003",
@@ -29,9 +27,9 @@ export const projects: Project[] = [
     logline: "九十年代上海弄堂里，两家理发店三代人的恩怨与和解。",
     genre: "年代剧",
     status: "writing",
-    progress: 34,
+    progress: 37,
     members: ["苏晚晴", "陈默"],
-    updatedAt: now,
+    updatedAt: "2026-10-08T10:15:00.000Z",
   },
   {
     id: "p-004",
@@ -39,9 +37,9 @@ export const projects: Project[] = [
     logline: "一家深夜开张的小饭馆，每位客人都会带来一段山精海怪的故事。",
     genre: "奇幻单元剧",
     status: "planning",
-    progress: 8,
+    progress: 12,
     members: ["林小满"],
-    updatedAt: now,
+    updatedAt: "2026-10-05T20:45:00.000Z",
   },
   {
     id: "p-005",
@@ -51,7 +49,7 @@ export const projects: Project[] = [
     status: "released",
     progress: 100,
     members: ["段飞白", "许知意", "沈青"],
-    updatedAt: now,
+    updatedAt: "2026-09-28T08:00:00.000Z",
   },
   {
     id: "p-006",
@@ -61,7 +59,7 @@ export const projects: Project[] = [
     status: "writing",
     progress: 21,
     members: ["江野", "顾云舟"],
-    updatedAt: now,
+    updatedAt: "2026-10-10T16:20:00.000Z",
   },
 ];
 
@@ -73,7 +71,7 @@ export const actors: Actor[] = [
     tags: ["悬疑", "正剧"],
     projectCount: 2,
     accent: "indigo",
-    createdAt: now,
+    createdAt: "2026-08-14T09:00:00.000Z",
   },
   {
     id: "a-002",
@@ -82,34 +80,34 @@ export const actors: Actor[] = [
     tags: ["科幻", "青春"],
     projectCount: 1,
     accent: "cyan",
-    createdAt: now,
+    createdAt: "2026-09-02T09:00:00.000Z",
   },
   {
     id: "a-003",
     name: "陆离",
     persona: "35 岁，古装贵公子气质，武打动作功底扎实",
     tags: ["古装", "武侠"],
-    projectCount: 1,
+    projectCount: 3,
     accent: "amber",
-    createdAt: now,
+    createdAt: "2026-07-21T09:00:00.000Z",
   },
   {
     id: "a-004",
     name: "苏晚晴",
     persona: "28 岁，江南温婉气质，擅长年代戏与家庭伦理剧",
     tags: ["年代", "家庭"],
-    projectCount: 1,
+    projectCount: 2,
     accent: "rose",
-    createdAt: now,
+    createdAt: "2026-06-30T09:00:00.000Z",
   },
   {
     id: "a-005",
     name: "段飞白",
     persona: "40 岁，沧桑硬汉形象，台词功底深厚，适合刑侦与军旅",
     tags: ["刑侦", "硬汉"],
-    projectCount: 1,
+    projectCount: 4,
     accent: "emerald",
-    createdAt: now,
+    createdAt: "2026-05-18T09:00:00.000Z",
   },
   {
     id: "a-006",
@@ -118,7 +116,7 @@ export const actors: Actor[] = [
     tags: ["奇幻", "喜剧"],
     projectCount: 1,
     accent: "violet",
-    createdAt: now,
+    createdAt: "2026-09-26T09:00:00.000Z",
   },
 ];
 
@@ -130,7 +128,7 @@ export const scenes: Scene[] = [
     timeOfDay: "夜",
     tags: ["外景", "群像"],
     projectName: "长安十二时辰 · 重制",
-    createdAt: now,
+    createdAt: "2026-09-30T09:00:00.000Z",
   },
   {
     id: "s-002",
@@ -139,7 +137,7 @@ export const scenes: Scene[] = [
     timeOfDay: "无自然光",
     tags: ["内景", "特效"],
     projectName: "星际摆渡人",
-    createdAt: now,
+    createdAt: "2026-10-06T09:00:00.000Z",
   },
   {
     id: "s-003",
@@ -148,7 +146,7 @@ export const scenes: Scene[] = [
     timeOfDay: "日",
     tags: ["内景", "实景改造"],
     projectName: "弄堂风云",
-    createdAt: now,
+    createdAt: "2026-09-12T09:00:00.000Z",
   },
   {
     id: "s-004",
@@ -157,7 +155,7 @@ export const scenes: Scene[] = [
     timeOfDay: "夜",
     tags: ["内景", "棚拍"],
     projectName: "山海食肆",
-    createdAt: now,
+    createdAt: "2026-10-01T09:00:00.000Z",
   },
 ];
 
@@ -168,7 +166,7 @@ export const costumes: Costume[] = [
     description: "深青色圆领袍配革带，袖口收窄便于动作，做旧处理体现风尘感。",
     era: "唐",
     tags: ["男装", "动作戏"],
-    createdAt: now,
+    createdAt: "2026-09-15T09:00:00.000Z",
   },
   {
     id: "c-002",
@@ -176,7 +174,7 @@ export const costumes: Costume[] = [
     description: "哑光灰蓝连体服，反光条与旧化补丁，胸前磁吸式身份徽章。",
     era: "近未来",
     tags: ["科幻", "系列化"],
-    createdAt: now,
+    createdAt: "2026-10-09T09:00:00.000Z",
   },
   {
     id: "c-003",
@@ -184,7 +182,7 @@ export const costumes: Costume[] = [
     description: "碎花衬衫配高腰西裤，一副细框眼镜，还原九十年代都市女性日常。",
     era: "1990s",
     tags: ["女装", "年代"],
-    createdAt: now,
+    createdAt: "2026-08-25T09:00:00.000Z",
   },
   {
     id: "c-004",
@@ -192,6 +190,6 @@ export const costumes: Costume[] = [
     description: "粗麻围裙与绑袖，边缘烧毛处理，口袋插满调羹与试味签。",
     era: "当代",
     tags: ["餐饮", "耐脏"],
-    createdAt: now,
+    createdAt: "2026-10-02T09:00:00.000Z",
   },
 ];

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Moon } from "lucide-react";
+import { ChevronRight, Moon } from "lucide-react";
+import type { ReactNode } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Switch } from "@/components/ui/switch";
 
@@ -10,10 +11,10 @@ function Section({
 }: {
   title: string;
   description?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
-    <section className="max-w-2xl">
+    <section className="max-w-3xl">
       <h2 className="text-[13px] font-medium tracking-tight">{title}</h2>
       {description ? (
         <p className="mt-0.5 text-[12px] text-muted-foreground">{description}</p>
@@ -23,15 +24,7 @@ function Section({
   );
 }
 
-function Row({
-  label,
-  hint,
-  control,
-}: {
-  label: string;
-  hint?: string;
-  control?: React.ReactNode;
-}) {
+function Row({ label, hint, control }: { label: string; hint?: string; control?: ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-4 border-b px-4 py-3 last:border-b-0">
       <div className="min-w-0">
@@ -40,6 +33,15 @@ function Row({
       </div>
       {control}
     </div>
+  );
+}
+
+function ValueLink({ value }: { value: string }) {
+  return (
+    <span className="flex shrink-0 items-center gap-1 text-[12px] text-muted-foreground">
+      {value}
+      <ChevronRight className="size-3.5" />
+    </span>
   );
 }
 
@@ -58,10 +60,10 @@ export function SettingsPage() {
         <Section title="外观" description="界面主题与显示偏好">
           <Row
             label="深色模式"
-            hint="Linear 风格的近黑界面，关闭后切换为浅色"
+            hint="使用深色界面，关闭后切换为浅色"
             control={
-              <div className="flex items-center gap-2">
-                <Moon className="size-3.5 text-muted-foreground" />
+              <div className="flex shrink-0 items-center gap-2">
+                <Moon className="size-3.5 text-foreground/70" />
                 <Switch checked={dark} onCheckedChange={toggleDark} />
               </div>
             }
@@ -72,26 +74,23 @@ export function SettingsPage() {
           <Row
             label="生成模型"
             hint="用于剧本、形象与场景生成"
-            control={<span className="text-[12px] text-muted-foreground">未接入</span>}
+            control={<ValueLink value="未接入" />}
           />
           <Row
             label="API Key"
-            hint="访问密钥，仅保存在本地"
-            control={<span className="text-[12px] text-muted-foreground">未设置</span>}
+            hint="访问密钥，仅保存在本机"
+            control={<ValueLink value="未设置" />}
           />
         </Section>
 
         <Section title="关于">
           <Row
             label="版本"
-            control={<span className="text-[12px] tabular-nums text-muted-foreground">0.0.0</span>}
-          />
-          <Row
-            label="数据存储"
             control={
-              <span className="text-[12px] text-muted-foreground">本地内存（开发阶段）</span>
+              <span className="shrink-0 text-[12px] tabular-nums text-muted-foreground">0.0.0</span>
             }
           />
+          <Row label="数据存储" control={<ValueLink value="本机存储" />} />
         </Section>
       </div>
     </div>

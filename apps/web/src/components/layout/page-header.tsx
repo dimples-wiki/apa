@@ -10,11 +10,11 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <header className="flex items-start justify-between gap-4 px-8 pt-6 pb-5">
+    <header className="flex items-start justify-between gap-4 px-8 pt-7 pb-5">
       <div className="min-w-0">
-        <h1 className="text-[15px] font-semibold tracking-tight">{title}</h1>
+        <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
         {description ? (
-          <p className="mt-0.5 text-[13px] text-muted-foreground">{description}</p>
+          <p className="mt-1 text-[13px] text-muted-foreground">{description}</p>
         ) : null}
       </div>
       {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}

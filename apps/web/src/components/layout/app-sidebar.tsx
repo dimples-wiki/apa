@@ -1,4 +1,4 @@
-import { Clapperboard, FolderKanban, Settings, Shirt, Users } from "lucide-react";
+import { Clapperboard, FolderKanban, Mountain, Settings, Shirt, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { NavLink, useLocation } from "react-router";
 import { useApi } from "@/hooks/use-api";
@@ -35,14 +35,14 @@ function useNavItems(): NavItem[] {
   return [
     { title: "项目列表", to: "/projects", icon: FolderKanban, count: projects.data?.length },
     { title: "演员", to: "/actors", icon: Users, count: actors.data?.length },
-    { title: "场景", to: "/scenes", icon: Clapperboard, count: scenes.data?.length },
+    { title: "场景", to: "/scenes", icon: Mountain, count: scenes.data?.length },
     { title: "服饰", to: "/costumes", icon: Shirt, count: costumes.data?.length },
   ];
 }
 
 function NavRow({ item, active }: { item: NavItem; active: boolean }) {
   return (
-    <SidebarMenuItem>
+    <SidebarMenuItem className="relative">
       <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
         <NavLink to={item.to}>
           <item.icon />
@@ -50,7 +50,10 @@ function NavRow({ item, active }: { item: NavItem; active: boolean }) {
         </NavLink>
       </SidebarMenuButton>
       {item.count !== undefined ? (
-        <SidebarMenuBadge className="tabular-nums">{item.count}</SidebarMenuBadge>
+        <>
+          <SidebarMenuBadge className="tabular-nums">{item.count}</SidebarMenuBadge>
+          <span className="pointer-events-none absolute top-1/2 right-2 hidden size-1 -translate-y-1/2 rounded-full bg-foreground/45 group-data-[collapsible=icon]:block" />
+        </>
       ) : null}
     </SidebarMenuItem>
   );
@@ -63,18 +66,18 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <div className="flex items-center justify-between gap-1 px-2 py-1 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:px-1">
+        <div className="flex items-center justify-between gap-1 px-2 py-1 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
           <SidebarMenuButton
             size="lg"
             className="pointer-events-none group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-0"
             tooltip="FilmStudio"
           >
-            <div className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-[#6e79d6] to-[#4c55b8] text-white shadow-sm">
+            <div className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-md bg-foreground text-background">
               <Clapperboard className="size-4" />
             </div>
             <span className="text-[15px] font-semibold tracking-tight">FilmStudio</span>
           </SidebarMenuButton>
-          <SidebarTrigger className="size-7 shrink-0 text-sidebar-foreground/60 group-data-[collapsible=icon]:mt-1" />
+          <SidebarTrigger className="size-7 shrink-0 text-sidebar-foreground/60 group-data-[collapsible=icon]:hidden" />
         </div>
       </SidebarHeader>
 

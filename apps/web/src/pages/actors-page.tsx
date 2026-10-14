@@ -1,32 +1,30 @@
+import { useMemo, useState } from "react";
 import { Plus, UserRound } from "lucide-react";
 import type { Actor } from "@filmstudio/shared";
 import { PageHeader } from "@/components/layout/page-header";
-import { CardGridSkeleton, ErrorState } from "@/components/layout/list-state";
+import {
+  CardGridSkeleton,
+  ErrorState,
+  ListBody,
+  ListToolbar,
+} from "@/components/layout/list-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { useApi } from "@/hooks/use-api";
 import { api } from "@/lib/api";
 
-const accentStyles: Record<string, string> = {
-  indigo: "bg-indigo-500/15 text-indigo-700 ring-indigo-500/25 dark:text-indigo-300",
-  cyan: "bg-cyan-500/15 text-cyan-700 ring-cyan-500/25 dark:text-cyan-300",
-  amber: "bg-amber-500/15 text-amber-700 ring-amber-500/25 dark:text-amber-300",
-  rose: "bg-rose-500/15 text-rose-700 ring-rose-500/25 dark:text-rose-300",
-  emerald: "bg-emerald-500/15 text-emerald-700 ring-emerald-500/25 dark:text-emerald-300",
-  violet: "bg-violet-500/15 text-violet-700 ring-violet-500/25 dark:text-violet-300",
-};
-
 function ActorCard({ actor }: { actor: Actor }) {
-  const accent = accentStyles[actor.accent] ?? accentStyles.indigo;
-
   return (
-    <Card className="gap-3 py-4 transition-colors hover:border-foreground/15">
-      <CardContent className="space-y-3 px-4">
-        <div className={`flex size-14 items-center justify-center rounded-lg ring-1 ${accent}`}>
-          <span className="text-lg font-medium">{actor.name.slice(0, 1)}</span>
-        </div>
+    <Card className="group gap-0 overflow-hidden py-0 transition-colors hover:border-foreground/25">
+      <div className="relative flex h-24 items-center justify-center border-b bg-gradient-to-br from-foreground/[0.08] to-foreground/[0.015]">
+        <UserRound className="size-11 text-foreground/[0.16]" strokeWidth={1.25} />
+        <span className="absolute top-2.5 right-3 text-[11px] text-muted-foreground">
+          {actor.name.slice(0, 1)}
+        </span>
+      </div>
+      <CardContent className="space-y-2.5 p-4">
         <div className="space-y-1">
-          <h3 className="text-[14px] font-medium tracking-tight">{actor.name}</h3>
+          <h3 className="text-[15px] font-medium tracking-tight">{actor.name}</h3>
           <p className="line-clamp-2 min-h-10 text-[12px] leading-5 text-muted-foreground">
             {actor.persona}
           </p>
@@ -42,8 +40,7 @@ function ActorCard({ actor }: { actor: Actor }) {
           ))}
         </div>
       </CardContent>
-      <CardFooter className="border-t px-4 pt-3 text-[11px] text-muted-foreground">
-        <UserRound className="mr-1 size-3" />
+      <CardFooter className="border-t px-4 pt-3 text-[11px] text-muted-foreground tabular-nums">
         参演 {actor.projectCount} 个项目
       </CardFooter>
     </Card>
@@ -51,7 +48,15 @@ function ActorCard({ actor }: { actor: Actor }) {
 }
 
 export function ActorsPage() {
-  const { data, error, loading } = useApi(api.actors);
+  const { data, error, loading, reload } = useApi(api.actors);
+  const [query, setQuery] = useState("");
+
+  const filtered = useMemo(() => {
+    const q = query.trim();
+    if (!data) return null;
+    if (!q) return data;
+    return data.filter((a) => (a.name + a.persona + a.tags.join()).includes(q));
+  }, [data, query]);
 
   return (
     <div className="flex min-h-svh flex-col">
@@ -65,19 +70,26 @@ export function ActorsPage() {
           </Button>
         }
       />
-      <div className="flex-1 px-8 pb-8">
+      <ListToolbar
+        placeholder="搜索演员…"
+        unit="位演员"
+        count={error || loading ? null : (filtered?.length ?? 0)}
+        query={query}
+        onQueryChange={setQuery}
+      />
+      <ListBody>
         {loading ? (
-          <CardGridSkeleton count={8} />
+          <CardGridSkeleton variant="actor" count={6} />
         ) : error ? (
-          <ErrorState message={error} />
+          <ErrorState onRetry={reload} />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {data?.map((actor) => (
+            {filtered?.map((actor) => (
               <ActorCard key={actor.id} actor={actor} />
             ))}
           </div>
         )}
-      </div>
+      </ListBody>
     </div>
   );
 }

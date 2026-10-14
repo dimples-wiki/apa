@@ -1,19 +1,21 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export function useApi<T>(fetcher: () => Promise<T>) {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let alive = true;
     setLoading(true);
+    setError(null);
     fetcher()
       .then((result) => {
         if (alive) setData(result);
       })
-      .catch((err: unknown) => {
-        if (alive) setError(err instanceof Error ? err.message : String(err));
+      .catch(() => {
+        if (alive) setError("request-failed");
       })
       .finally(() => {
         if (alive) setLoading(false);
@@ -21,7 +23,9 @@ export function useApi<T>(fetcher: () => Promise<T>) {
     return () => {
       alive = false;
     };
-  }, [fetcher]);
+  }, [fetcher, attempt]);
 
-  return { data, error, loading };
+  const reload = useCallback(() => setAttempt((a) => a + 1), []);
+
+  return { data, error, loading, reload };
 }
