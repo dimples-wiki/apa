@@ -34,12 +34,14 @@ function CostumeCard({ costume, index }: { costume: Costume; index: number }) {
         <div className={`absolute inset-0 ${coverGrid}`} />
         <div className="absolute inset-0 opacity-[0.12] mix-blend-overlay" style={grainTexture} />
         <span
-          className="absolute bottom-1.5 left-3 text-[44px] leading-none font-semibold tracking-tight select-none [mask-image:linear-gradient(to_bottom,black_55%,transparent_98%)]"
+          className="absolute -bottom-1.5 right-3 text-[48px] leading-none font-semibold tracking-tight select-none [mask-image:linear-gradient(to_bottom,black_45%,transparent_95%)]"
           style={{ color: "var(--cover-word)" }}
         >
-          {costume.name.slice(0, 1)}
+          {costume.era.startsWith(costume.name.slice(0, 1))
+            ? costume.name.replace(/\s/g, "").slice(1, 2)
+            : costume.name.slice(0, 1)}
         </span>
-        <span className="absolute top-2.5 right-3 rounded border bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground backdrop-blur-sm">
+        <span className="absolute top-2.5 left-3 rounded border bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground backdrop-blur-sm">
           {costume.era}
         </span>
       </CardHeader>
@@ -89,7 +91,7 @@ export function CostumesPage() {
         <ListToolbar
           placeholder="搜索服饰…"
           unit="套服饰"
-          count={error ? null : loading ? null : (filtered?.length ?? 0)}
+          count={error || loading ? null : (filtered?.length ?? 0)}
           countHidden={Boolean(error)}
           query={query}
           onQueryChange={setQuery}
@@ -100,12 +102,12 @@ export function CostumesPage() {
           <CardGridSkeleton
             variant="costume"
             count={4}
-            cols="sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            cols="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
           />
         ) : error ? (
           <ErrorState onRetry={reload} />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className={"grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"}>
             {filtered?.map((costume, index) => (
               <CostumeCard key={costume.id} costume={costume} index={index} />
             ))}

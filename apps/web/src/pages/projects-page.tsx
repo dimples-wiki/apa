@@ -83,7 +83,7 @@ function ProjectCard({ project }: { project: Project }) {
 
 const progressTone: Record<ProjectStatus, string> = {
   planning:
-    "[&>div]:bg-zinc-500 [&>div]:bg-[repeating-linear-gradient(45deg,transparent_0px,transparent_2px,rgba(0,0,0,0.35)_2px,rgba(0,0,0,0.35)_4px)] dark:[&>div]:bg-zinc-600 dark:[&>div]:bg-[repeating-linear-gradient(45deg,transparent_0px,transparent_2px,rgba(255,255,255,0.38)_2px,rgba(255,255,255,0.38)_4px)]",
+    "[&>div]:bg-zinc-500 [&>div]:bg-[repeating-linear-gradient(45deg,transparent_0px,transparent_2px,rgba(0,0,0,0.35)_2px,rgba(0,0,0,0.35)_4px)] dark:[&>div]:bg-zinc-600 dark:[&>div]:bg-[repeating-linear-gradient(45deg,transparent_0px,transparent_2px,rgba(255,255,255,0.5)_2px,rgba(255,255,255,0.5)_4px)]",
   writing: "[&>div]:bg-amber-500",
   shooting: "[&>div]:bg-[#0070f3]",
   post: "[&>div]:bg-violet-500",
@@ -124,40 +124,43 @@ export function ProjectsPage() {
           </Button>
         }
       />
-      {!error && (
-        <ListToolbar
-          placeholder="搜索项目…"
-          unit="个项目"
-          count={loading ? null : (filtered?.length ?? 0)}
-          query={query}
-          onQueryChange={setQuery}
-        >
-          <div className="flex flex-wrap items-center gap-1.5">
-            {statusFilters.map((f) => (
-              <button
-                key={f.key}
-                type="button"
-                onClick={() => setStatus(f.key)}
-                className={cn(
-                  "h-7 rounded-full border px-3 text-[12px] transition-colors",
-                  status === f.key
-                    ? "border-foreground/45 bg-foreground/8 font-medium text-foreground"
-                    : "text-muted-foreground hover:border-foreground/30 hover:text-foreground",
-                )}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-        </ListToolbar>
-      )}
+      <ListToolbar
+        placeholder="搜索项目…"
+        unit="个项目"
+        count={error ? null : loading ? null : (filtered?.length ?? 0)}
+        countHidden={Boolean(error)}
+        query={query}
+        onQueryChange={setQuery}
+      >
+        <div className="flex flex-1 items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {statusFilters.map((f) => (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => setStatus(f.key)}
+              className={cn(
+                "h-7 rounded-full border px-3 text-[12px] transition-colors",
+                status === f.key
+                  ? "border-foreground/45 bg-foreground/8 font-medium text-foreground"
+                  : "text-muted-foreground hover:border-foreground/30 hover:text-foreground",
+              )}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </ListToolbar>
       <ListBody>
         {loading ? (
-          <CardGridSkeleton variant="project" count={6} cols="md:grid-cols-2 xl:grid-cols-3" />
+          <CardGridSkeleton
+            variant="project"
+            count={8}
+            cols="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
+          />
         ) : error ? (
           <ErrorState onRetry={reload} />
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className={"grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"}>
             {filtered?.map((project) => (
               <ProjectCard key={project.id} project={project} />
             ))}

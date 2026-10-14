@@ -31,8 +31,8 @@ export function sceneHue(timeOfDay: string, index = 0): number {
       ? 185
       : timeOfDay.includes("黄昏") || timeOfDay.includes("晨")
         ? 30
-        : 85;
-  return (base + ((index % 3) - 1) * 14 + 360) % 360;
+        : 100;
+  return (base + ((index % 3) - 1) * 8 + 360) % 360;
 }
 
 /** 服饰/演员按名字派生（跳土棕区） */

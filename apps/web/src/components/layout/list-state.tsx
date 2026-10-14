@@ -28,7 +28,7 @@ export function ListToolbar({
   children?: ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-3 px-8 pb-5">
+    <div className="flex flex-wrap items-center gap-3 px-4 pb-5 sm:px-8">
       <div className="relative w-72">
         <Search className="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -39,18 +39,18 @@ export function ListToolbar({
           className="h-8 rounded-md bg-card pr-8 pl-8 text-[13px]"
         />
         {!countHidden ? (
-          <kbd className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2 rounded border bg-muted px-1 font-sans text-[10px] text-muted-foreground">
+          <kbd className="pointer-events-none absolute top-1/2 right-2 hidden -translate-y-1/2 rounded border bg-muted px-1 font-sans text-[10px] text-muted-foreground sm:block">
             ⌘K
           </kbd>
         ) : null}
       </div>
-      {children ? <div className="ml-auto">{children}</div> : null}
+      {children ? <div className="min-w-0 flex-1 sm:ml-auto sm:flex-none">{children}</div> : null}
       {countHidden ? null : count !== null ? (
         <span className="ml-auto text-[12px] tabular-nums text-muted-foreground">
           {count} {unit}
         </span>
       ) : count !== undefined && !children ? (
-        <Skeleton className="ml-auto h-3.5 w-14" />
+        <Skeleton className="ml-auto h-3.5 w-16" />
       ) : null}
     </div>
   );
@@ -115,19 +115,12 @@ export function ErrorState({ onRetry }: { onRetry?: () => void }) {
     <div className="flex flex-1 items-center justify-center py-4">
       <div className="relative flex w-full max-w-xl flex-col items-center justify-center gap-3 overflow-hidden rounded-lg border bg-card py-14 text-center shadow-xs">
         <div className={`absolute inset-0 opacity-60 ${coverGrid}`} />
-        <span
-          className="absolute -top-4 right-4 text-[120px] leading-none font-semibold tracking-tight select-none [mask-image:linear-gradient(200deg,black_60%,transparent_80%)]"
-          style={{ color: "var(--cover-word)" }}
-          aria-hidden
-        >
-          !
-        </span>
-        <div className="relative flex size-9 items-center justify-center rounded-full bg-destructive/15">
-          <AlertTriangle className="size-4 text-destructive" />
+        <div className="relative flex size-9 items-center justify-center rounded-full bg-destructive/20">
+          <AlertTriangle className="size-4 text-red-500" />
         </div>
         <div className="relative">
           <p className="text-[14px] font-medium">无法连接服务</p>
-          <p className="mt-1 text-[12.5px] text-muted-foreground">网络连接异常，请检查后重试</p>
+          <p className="mt-1 text-[12.5px] text-foreground/70">网络连接异常，请检查后重试</p>
         </div>
         {onRetry ? (
           <Button size="sm" className="relative mt-1" onClick={onRetry}>
@@ -141,5 +134,5 @@ export function ErrorState({ onRetry }: { onRetry?: () => void }) {
 
 /** 列表网格容器 */
 export function ListBody({ children }: { children: ReactNode }) {
-  return <div className="flex flex-1 flex-col px-8 pb-8">{children}</div>;
+  return <div className="flex flex-1 flex-col px-4 pb-8 sm:px-8">{children}</div>;
 }

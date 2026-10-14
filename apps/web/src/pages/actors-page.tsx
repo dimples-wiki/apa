@@ -53,22 +53,19 @@ function ActorCard({ actor, index }: { actor: Actor; index: number }) {
         <div
           className="absolute inset-0 dark:hidden"
           style={{
-            backgroundColor: `oklch(0.91 0.03 ${actorCover(actor.name, index).hue})`,
+            backgroundColor: `oklch(0.93 0.025 ${actorCover(actor.name, index).hue})`,
             backgroundImage: actorCover(actor.name, index).light,
           }}
         />
         <div className={`absolute inset-0 opacity-40 ${coverGrid}`} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent dark:from-black/45" />
         <span
-          className="absolute -bottom-1 -left-1 text-[52px] leading-none font-semibold tracking-tight select-none [mask-image:linear-gradient(to_top,black_45%,transparent_95%)]"
+          className="absolute -bottom-2 right-3 text-[56px] leading-none font-semibold tracking-tight select-none [mask-image:linear-gradient(to_bottom,black_45%,transparent_95%)]"
           style={{ color: "var(--cover-word)" }}
         >
           {actor.name.slice(0, 1)}
         </span>
         <div className="absolute inset-0 opacity-[0.2] mix-blend-overlay" style={grainTexture} />
-        <span className="absolute top-2.5 right-3 rounded border bg-background/75 px-1.5 py-0.5 text-[10px] font-medium text-foreground backdrop-blur-sm">
-          {actor.tags.join(" · ")}
-        </span>
       </div>
       <CardContent className="flex-1 space-y-2.5 p-4">
         <div className="space-y-1">
@@ -76,6 +73,16 @@ function ActorCard({ actor, index }: { actor: Actor; index: number }) {
           <p className="line-clamp-2 min-h-10 text-[12px] leading-5 text-muted-foreground [text-wrap:pretty]">
             {actor.persona}
           </p>
+        </div>
+        <div className="flex flex-wrap gap-1">
+          {actor.tags.map((tag) => (
+            <span
+              key={tag}
+              className="rounded border px-1.5 py-0.5 text-[11px] text-muted-foreground"
+            >
+              {tag}
+            </span>
+          ))}
         </div>
       </CardContent>
       <CardFooter className="items-center justify-between border-t px-4 pt-3 text-[11px] text-muted-foreground tabular-nums">
@@ -118,7 +125,7 @@ export function ActorsPage() {
         <ListToolbar
           placeholder="搜索演员…"
           unit="位演员"
-          count={error ? null : loading ? null : (filtered?.length ?? 0)}
+          count={error || loading ? null : (filtered?.length ?? 0)}
           countHidden={Boolean(error)}
           query={query}
           onQueryChange={setQuery}
@@ -129,12 +136,12 @@ export function ActorsPage() {
           <CardGridSkeleton
             variant="actor"
             count={6}
-            cols="sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            cols="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
           />
         ) : error ? (
           <ErrorState onRetry={reload} />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className={"grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"}>
             {filtered?.map((actor, index) => (
               <ActorCard key={actor.id} actor={actor} index={index} />
             ))}

@@ -4,13 +4,22 @@ export function PageHeader({
   title,
   description,
   actions,
+  flush = false,
 }: {
   title: string;
   description?: string;
   actions?: ReactNode;
+  /** 用于已自带横向边距的居中容器内 */
+  flush?: boolean;
 }) {
   return (
-    <header className="flex items-start justify-between gap-4 px-8 pt-7 pb-5">
+    <header
+      className={
+        flush
+          ? "flex flex-col gap-3 pt-6 pb-5 sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:pt-7"
+          : "flex flex-col gap-3 px-4 pt-6 pb-5 sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:px-8 sm:pt-7"
+      }
+    >
       <div className="min-w-0">
         <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
         {description ? (

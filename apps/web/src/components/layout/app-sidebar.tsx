@@ -1,7 +1,6 @@
 import { Clapperboard, FolderKanban, Mountain, Settings, Shirt, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { NavLink, useLocation } from "react-router";
-import { useSidebar } from "@/components/ui/sidebar";
 import { useApi } from "@/hooks/use-api";
 import { api } from "@/lib/api";
 import {
@@ -68,21 +67,14 @@ function NavRow({ item, active }: { item: NavItem; active: boolean }) {
 export function AppSidebar() {
   const items = useNavItems();
   const { pathname } = useLocation();
-  const { state, setOpen } = useSidebar();
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <div className="flex items-center justify-between gap-1 px-2 py-1 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-1 group-data-[collapsible=icon]:px-0">
+        <div className="flex h-12 items-center justify-between gap-1 px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
           <SidebarMenuButton
             size="lg"
-            onClick={state === "collapsed" ? () => setOpen(true) : undefined}
-            title={state === "collapsed" ? "展开侧边栏" : undefined}
-            className={
-              state === "collapsed"
-                ? "group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-0"
-                : "pointer-events-none"
-            }
+            className="pointer-events-none group-data-[collapsible=icon]:hidden"
             tooltip="FilmStudio"
           >
             <div className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-md bg-foreground text-background">
@@ -90,7 +82,7 @@ export function AppSidebar() {
             </div>
             <span className="text-[15px] font-semibold tracking-tight">FilmStudio</span>
           </SidebarMenuButton>
-          <SidebarTrigger className="size-7 shrink-0 text-sidebar-foreground/60 group-data-[collapsible=icon]:text-sidebar-foreground/40" />
+          <SidebarTrigger className="size-7 shrink-0 text-sidebar-foreground/60" />
         </div>
       </SidebarHeader>
 
