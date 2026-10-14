@@ -33,7 +33,7 @@ function ProjectCard({ project }: { project: Project }) {
 
   return (
     <Card className="group cursor-pointer gap-0 overflow-hidden py-0 transition-colors hover:border-foreground/25">
-      <CardHeader className="relative h-24 border-b p-4">
+      <CardHeader className="relative h-16 border-b p-4 sm:h-24">
         <div className={`absolute inset-0 ${coverGrid}`} />
         <span
           className="absolute -bottom-3 right-4 text-[64px] leading-none font-semibold tracking-tight select-none [mask-image:linear-gradient(to_bottom,black_45%,transparent_96%)]"
@@ -64,18 +64,20 @@ function ProjectCard({ project }: { project: Project }) {
             value={project.progress}
             className={cn("h-1 w-full", progressTone[project.status])}
           />
-          <span className="w-9 shrink-0 text-right text-[11px] tabular-nums text-muted-foreground">
+          <span className="w-9 shrink-0 text-right text-xs tabular-nums text-muted-foreground sm:text-[11px]">
             {project.progress}%
           </span>
         </div>
         <span
-          className="max-w-24 shrink-0 truncate text-[11px] text-muted-foreground"
+          className="max-w-24 shrink-0 truncate text-xs text-muted-foreground sm:text-[11px]"
           title={project.members.join("、")}
         >
           {project.members[0]}
           {project.members.length > 1 ? ` 等 ${project.members.length} 人` : ""}
         </span>
-        <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">{updatedAt}</span>
+        <span className="shrink-0 text-xs tabular-nums text-muted-foreground sm:text-[11px]">
+          {updatedAt}
+        </span>
       </CardFooter>
     </Card>
   );
@@ -132,14 +134,14 @@ export function ProjectsPage() {
         query={query}
         onQueryChange={setQuery}
       >
-        <div className="flex flex-1 items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex flex-1 items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [mask-image:linear-gradient(to_right,black_88%,transparent_100%)] [&::-webkit-scrollbar]:hidden">
           {statusFilters.map((f) => (
             <button
               key={f.key}
               type="button"
               onClick={() => setStatus(f.key)}
               className={cn(
-                "h-7 rounded-full border px-3 text-[12px] transition-colors",
+                "h-10 shrink-0 whitespace-nowrap rounded-full border px-3.5 text-[13px] transition-colors sm:h-9 sm:text-[12px]",
                 status === f.key
                   ? "border-foreground/45 bg-foreground/8 font-medium text-foreground"
                   : "text-muted-foreground hover:border-foreground/30 hover:text-foreground",

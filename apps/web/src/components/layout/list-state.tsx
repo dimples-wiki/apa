@@ -29,14 +29,14 @@ export function ListToolbar({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-3 px-4 pb-5 sm:px-8">
-      <div className="relative w-72">
-        <Search className="absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2 text-muted-foreground" />
+      <div className="relative w-full sm:w-72">
+        <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground sm:left-2.5 sm:size-3.5" />
         <Input
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
           placeholder={placeholder}
           disabled={countHidden}
-          className="h-8 rounded-md bg-card pr-8 pl-8 text-[13px]"
+          className="h-11 rounded-md bg-card pl-10 pr-4 text-[15px] sm:h-8 sm:pl-8 sm:pr-8 sm:text-[13px]"
         />
         {!countHidden ? (
           <kbd className="pointer-events-none absolute top-1/2 right-2 hidden -translate-y-1/2 rounded border bg-muted px-1 font-sans text-[10px] text-muted-foreground sm:block">
@@ -46,11 +46,11 @@ export function ListToolbar({
       </div>
       {children ? <div className="min-w-0 flex-1 sm:ml-auto sm:flex-none">{children}</div> : null}
       {countHidden ? null : count !== null ? (
-        <span className="ml-auto text-[12px] tabular-nums text-muted-foreground">
+        <span className="ml-auto hidden text-[12px] tabular-nums text-muted-foreground sm:inline">
           {count} {unit}
         </span>
       ) : count !== undefined && !children ? (
-        <Skeleton className="ml-auto h-3.5 w-16" />
+        <Skeleton className="ml-auto hidden h-3.5 w-16 sm:block" />
       ) : null}
     </div>
   );
@@ -60,12 +60,12 @@ export function ListToolbar({
 export function CardSkeleton({ variant }: { variant: "project" | "actor" | "scene" | "costume" }) {
   return (
     <Card className="gap-0 overflow-hidden py-0">
-      <div className="relative h-24 border-b bg-foreground/[0.05]">
+      <div className="relative h-16 border-b bg-foreground/[0.06] sm:h-24">
         {variant === "project" ? (
           <Skeleton className="absolute top-3 left-4 h-5 w-16 rounded-md" />
-        ) : (
-          <Skeleton className="absolute top-3 right-3 h-3.5 w-12 rounded" />
-        )}
+        ) : variant !== "actor" ? (
+          <Skeleton className="absolute top-2.5 left-3 h-5 w-12 rounded" />
+        ) : null}
       </div>
       <CardContent className="space-y-2.5 p-4">
         <Skeleton className="h-4 w-2/5" />

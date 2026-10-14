@@ -74,14 +74,14 @@ export function SettingsPage() {
               label="主题"
               hint="深色、浅色或跟随系统自动切换"
               control={
-                <div className="flex shrink-0 items-center gap-0.5 rounded-md border bg-foreground/5 p-0.5">
+                <div className="flex w-full shrink-0 items-center gap-0.5 rounded-md border bg-foreground/5 p-0.5 sm:w-auto">
                   {themeOptions.map((opt) => (
                     <button
                       key={opt.key}
                       type="button"
                       onClick={() => changeTheme(opt.key)}
                       className={cn(
-                        "h-6.5 rounded-sm px-2.5 text-[12px] transition-colors",
+                        "h-9 flex-1 rounded-sm px-2.5 text-[13px] transition-colors sm:h-6.5 sm:flex-none sm:text-[12px]",
                         theme === opt.key
                           ? "bg-foreground text-background"
                           : "text-muted-foreground hover:text-foreground",

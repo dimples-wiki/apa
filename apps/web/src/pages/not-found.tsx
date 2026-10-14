@@ -7,7 +7,7 @@ export function NotFoundPage() {
     <div className="relative flex min-h-svh flex-col items-center justify-center gap-3 overflow-hidden">
       <div className={`absolute inset-0 opacity-50 ${coverGrid}`} />
       <span
-        className="absolute -bottom-14 right-0 text-[240px] leading-none font-semibold tracking-tight select-none [mask-image:linear-gradient(to_top,black_30%,transparent_72%)]"
+        className="absolute -bottom-10 right-0 text-[120px] sm:-bottom-14 sm:text-[240px] leading-none font-semibold tracking-tight select-none [mask-image:linear-gradient(to_top,black_30%,transparent_72%)]"
         style={{ color: "var(--cover-word)" }}
         aria-hidden
       >

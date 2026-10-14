@@ -42,7 +42,7 @@ function actorCover(name: string, index: number) {
 function ActorCard({ actor, index }: { actor: Actor; index: number }) {
   return (
     <Card className="group gap-0 overflow-hidden py-0 transition-colors hover:border-foreground/25">
-      <div className="relative h-24 overflow-hidden border-b">
+      <div className="relative h-16 overflow-hidden border-b sm:h-24">
         <div
           className="absolute inset-0 hidden dark:block"
           style={{
@@ -85,7 +85,7 @@ function ActorCard({ actor, index }: { actor: Actor; index: number }) {
           ))}
         </div>
       </CardContent>
-      <CardFooter className="items-center justify-between border-t px-4 pt-3 text-[11px] text-muted-foreground tabular-nums">
+      <CardFooter className="items-center justify-between border-t px-4 pt-3 text-xs text-muted-foreground tabular-nums sm:text-[11px]">
         <span>参演 {actor.projectCount} 个项目</span>
         <span className="text-muted-foreground/70">
           {new Date(actor.createdAt).toLocaleDateString("zh-CN", {

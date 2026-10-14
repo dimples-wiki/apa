@@ -17,7 +17,7 @@ import { api } from "@/lib/api";
 function SceneCard({ scene, index }: { scene: Scene; index: number }) {
   return (
     <Card className="group gap-0 overflow-hidden py-0 transition-colors hover:border-foreground/25">
-      <CardHeader className="relative h-20 overflow-hidden border-b p-3">
+      <CardHeader className="relative h-14 overflow-hidden border-b p-3 sm:h-20">
         <div
           className="absolute inset-0"
           style={{ backgroundColor: `oklch(0.9 0.04 ${sceneHue(scene.timeOfDay, index)})` }}
@@ -32,7 +32,7 @@ function SceneCard({ scene, index }: { scene: Scene; index: number }) {
         <div className={`absolute inset-0 ${coverGrid}`} />
         <div className="absolute inset-0 opacity-[0.12] mix-blend-overlay" style={grainTexture} />
         <span
-          className="absolute -bottom-1.5 right-3 text-[48px] leading-none font-semibold tracking-tight select-none [mask-image:linear-gradient(to_bottom,black_45%,transparent_95%)]"
+          className="absolute -bottom-1 right-3 text-[36px] sm:text-[48px] leading-none font-semibold tracking-tight select-none [mask-image:linear-gradient(to_bottom,black_45%,transparent_95%)]"
           style={{ color: "var(--cover-word)" }}
         >
           {scene.name.slice(0, 1)}
@@ -47,7 +47,7 @@ function SceneCard({ scene, index }: { scene: Scene; index: number }) {
           {scene.description}
         </p>
       </CardContent>
-      <CardFooter className="items-center justify-between gap-2 border-t px-4 py-2.5 text-[11px] text-muted-foreground">
+      <CardFooter className="items-center justify-between gap-2 border-t px-4 py-2.5 text-xs text-muted-foreground sm:text-[11px]">
         <span className="truncate">{scene.projectName}</span>
         <span className="shrink-0">{scene.tags.join(" · ")}</span>
       </CardFooter>
