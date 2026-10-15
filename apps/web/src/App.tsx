@@ -1,3 +1,4 @@
+import { Toaster } from "@/components/ui/sonner";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { AppShell } from "@/components/layout/app-shell";
 import { ActorsPage } from "@/pages/actors-page";
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
+      <Toaster position="top-center" richColors />
     </BrowserRouter>
   );
 }

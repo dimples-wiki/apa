@@ -20,10 +20,10 @@
     "prepack": "pnpm --filter @dimples/apa-web build && pnpm build"
   },
   "dependencies": {
+    "@dimples/apa-shared": "workspace:*",
     "@hono/node-server": "^1.14.0",
     "commander": "^14.0.0",
-    "hono": "^4.9.0",
-    "@dimples/apa-shared": "workspace:*"
+    "hono": "^4.9.0"
   },
   "devDependencies": {
     "@types/node": "catalog:",

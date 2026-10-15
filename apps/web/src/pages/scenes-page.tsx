@@ -11,6 +11,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { coverGrid, grainTexture, sceneHue } from "@/lib/utils";
+import {
+  ResourceFormDialog,
+  tagList,
+  text,
+  type FormField,
+  type FormValues,
+} from "@/components/resource-form-dialog";
+import { toast } from "sonner";
 import { useApi } from "@/hooks/use-api";
 import { api } from "@/lib/api";
 
@@ -57,7 +65,58 @@ function SceneCard({ scene, index }: { scene: Scene; index: number }) {
 
 export function ScenesPage() {
   const { data, error, loading, reload } = useApi(api.scenes);
+  const projects = useApi(api.projects);
   const [query, setQuery] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const projectOptions = (projects.data ?? []).map((p) => ({ value: p.name, label: p.name }));
+  const formFields: FormField[] = [
+    {
+      kind: "text",
+      name: "name",
+      label: "场景名称",
+      placeholder: "如：长安西市 · 夜市",
+      required: true,
+    },
+    { kind: "textarea", name: "description", label: "场景描述", placeholder: "空间、光线、氛围…" },
+    {
+      kind: "select",
+      name: "timeOfDay",
+      label: "时段",
+      options: [
+        { value: "日", label: "日" },
+        { value: "黄昏", label: "黄昏" },
+        { value: "夜", label: "夜" },
+        { value: "无自然光", label: "无自然光" },
+      ],
+    },
+    { kind: "tags", name: "tags", label: "标签", placeholder: "输入标签后回车，如：内景 · 棚拍" },
+    {
+      kind: "select",
+      name: "projectName",
+      label: "关联项目",
+      emptyLabel: "不关联项目",
+      options: projectOptions,
+    },
+  ];
+
+  async function handleCreate(values: FormValues) {
+    setSubmitting(true);
+    try {
+      await api.createScene({
+        name: text(values, "name"),
+        description: text(values, "description"),
+        timeOfDay: text(values, "timeOfDay"),
+        tags: tagList(values, "tags"),
+        projectName: text(values, "projectName"),
+      });
+      toast.success("场景已创建");
+      reload();
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   const filtered = useMemo(() => {
     const q = query.trim();
@@ -72,11 +131,21 @@ export function ScenesPage() {
         title="场景"
         description="项目共用的场景素材库"
         actions={
-          <Button size="sm" className="gap-1.5" disabled={Boolean(error)}>
+          <Button size="sm" className="gap-1.5" onClick={() => setCreateOpen(true)}>
             <Plus className="size-3.5" />
             新建场景
           </Button>
         }
+      />
+      <ResourceFormDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        title="新建场景"
+        description="沉淀一个可复用的场景资产"
+        submitLabel="创建场景"
+        submitting={submitting}
+        fields={formFields}
+        onSubmit={handleCreate}
       />
       {!error && (
         <ListToolbar

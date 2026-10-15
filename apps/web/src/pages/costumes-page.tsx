@@ -11,6 +11,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { coverGrid, grainTexture } from "@/lib/utils";
+import {
+  ResourceFormDialog,
+  tagList,
+  text,
+  type FormField,
+  type FormValues,
+} from "@/components/resource-form-dialog";
+import { toast } from "sonner";
 import { useApi } from "@/hooks/use-api";
 import { api } from "@/lib/api";
 
@@ -67,6 +75,47 @@ function CostumeCard({ costume, index }: { costume: Costume; index: number }) {
 export function CostumesPage() {
   const { data, error, loading, reload } = useApi(api.costumes);
   const [query, setQuery] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const formFields: FormField[] = [
+    {
+      kind: "text",
+      name: "name",
+      label: "服饰名称",
+      placeholder: "如：唐代圆领袍 · 官差制式",
+      required: true,
+    },
+    {
+      kind: "textarea",
+      name: "description",
+      label: "造型描述",
+      placeholder: "形制、面料、做旧处理…",
+    },
+    {
+      kind: "text",
+      name: "era",
+      label: "时代",
+      placeholder: "如：唐 / 近未来",
+      suggestions: ["唐", "宋", "明", "清", "民国", "九十年代", "当代", "近未来"],
+    },
+    { kind: "tags", name: "tags", label: "标签", placeholder: "输入标签后回车，如：男装 · 动作戏" },
+  ];
+
+  async function handleCreate(values: FormValues) {
+    setSubmitting(true);
+    try {
+      await api.createCostume({
+        name: text(values, "name"),
+        description: text(values, "description"),
+        era: text(values, "era"),
+        tags: tagList(values, "tags"),
+      });
+      toast.success("服饰已创建");
+      reload();
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   const filtered = useMemo(() => {
     const q = query.trim();
@@ -81,11 +130,21 @@ export function CostumesPage() {
         title="服饰"
         description="角色服饰与造型设定库"
         actions={
-          <Button size="sm" className="gap-1.5" disabled={Boolean(error)}>
+          <Button size="sm" className="gap-1.5" onClick={() => setCreateOpen(true)}>
             <Plus className="size-3.5" />
             新建服饰
           </Button>
         }
+      />
+      <ResourceFormDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        title="新建服饰"
+        description="沉淀一套服饰与造型设定"
+        submitLabel="创建服饰"
+        submitting={submitting}
+        fields={formFields}
+        onSubmit={handleCreate}
       />
       {!error && (
         <ListToolbar

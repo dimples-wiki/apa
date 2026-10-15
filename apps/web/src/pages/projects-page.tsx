@@ -3,6 +3,13 @@ import { ArrowUpRight, Plus } from "lucide-react";
 import type { Project, ProjectStatus } from "@dimples/apa-shared";
 import { PROJECT_STATUS_LABELS } from "@dimples/apa-shared";
 import { assetUrl, cn, coverGrid } from "@/lib/utils";
+import {
+  ResourceFormDialog,
+  tagList,
+  text,
+  type FormField,
+  type FormValues,
+} from "@/components/resource-form-dialog";
 import { PageHeader } from "@/components/layout/page-header";
 import {
   CardGridSkeleton,
@@ -14,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
 import { useApi } from "@/hooks/use-api";
 import { api } from "@/lib/api";
 
@@ -97,6 +105,34 @@ function ProjectCard({ project }: { project: Project }) {
   );
 }
 
+const projectFormFields: FormField[] = [
+  {
+    kind: "text",
+    name: "name",
+    label: "项目名称",
+    placeholder: "如：长安十二时辰 · 重制",
+    required: true,
+  },
+  { kind: "textarea", name: "logline", label: "一句话故事", placeholder: "用一句话概括这个故事" },
+  {
+    kind: "text",
+    name: "genre",
+    label: "题材",
+    placeholder: "如：古装悬疑",
+    suggestions: ["古装悬疑", "都市情感", "科幻", "悬疑刑侦", "奇幻", "年代", "喜剧", "运动"],
+  },
+  {
+    kind: "select",
+    name: "status",
+    label: "当前状态",
+    options: (Object.keys(PROJECT_STATUS_LABELS) as ProjectStatus[]).map((key) => ({
+      value: key,
+      label: PROJECT_STATUS_LABELS[key],
+    })),
+  },
+  { kind: "tags", name: "members", label: "主创成员", placeholder: "输入姓名后回车，最多 8 人" },
+];
+
 const progressTone: Record<ProjectStatus, string> = {
   planning:
     "[&>div]:bg-zinc-500 [&>div]:bg-[repeating-linear-gradient(45deg,transparent_0px,transparent_2px,rgba(0,0,0,0.35)_2px,rgba(0,0,0,0.35)_4px)] dark:[&>div]:bg-zinc-600 dark:[&>div]:bg-[repeating-linear-gradient(45deg,transparent_0px,transparent_2px,rgba(255,255,255,0.5)_2px,rgba(255,255,255,0.5)_4px)]",
@@ -118,6 +154,8 @@ export function ProjectsPage() {
   const { data, error, loading, reload } = useApi(api.projects);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<ProjectStatus | "all">("all");
+  const [createOpen, setCreateOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const filtered = useMemo(() => {
     if (!data) return null;
@@ -128,17 +166,44 @@ export function ProjectsPage() {
     return rows;
   }, [data, query, status]);
 
+  async function handleCreate(values: FormValues) {
+    setSubmitting(true);
+    try {
+      await api.createProject({
+        name: text(values, "name"),
+        logline: text(values, "logline"),
+        genre: text(values, "genre"),
+        status: (values.status as ProjectStatus | undefined) ?? undefined,
+        members: tagList(values, "members"),
+      });
+      toast.success("项目已创建");
+      reload();
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <div className="flex min-h-svh flex-col">
       <PageHeader
         title="项目"
         description="管理你的影视项目，从剧本到成片"
         actions={
-          <Button size="sm" className="gap-1.5" disabled={Boolean(error)}>
+          <Button size="sm" className="gap-1.5" onClick={() => setCreateOpen(true)}>
             <Plus className="size-3.5" />
             新建项目
           </Button>
         }
+      />
+      <ResourceFormDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        title="新建项目"
+        description="创建一个影视项目，封面可稍后在项目详情中补充"
+        submitLabel="创建项目"
+        submitting={submitting}
+        fields={projectFormFields}
+        onSubmit={handleCreate}
       />
       <ListToolbar
         placeholder="搜索项目…"

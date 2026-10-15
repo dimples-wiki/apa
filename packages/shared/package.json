@@ -1,6 +1,9 @@
 {
   "name": "@dimples/apa-shared",
   "version": "0.1.0-dev.2",
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -8,17 +11,14 @@
       "import": "./dist/index.mjs"
     }
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsdown"
   },
   "devDependencies": {
     "tsdown": "catalog:"
-  },
-  "files": [
-    "dist"
-  ],
-  "publishConfig": {
-    "access": "public"
   },
   "engines": {
     "node": ">=22.18.0"
