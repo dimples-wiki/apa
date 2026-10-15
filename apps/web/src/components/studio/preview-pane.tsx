@@ -9,7 +9,8 @@ const statusVariant: Record<Shot["status"], string> = {
   keyframe: "border-amber-500/40 text-amber-400",
   generating: "border-[#0070f3]/40 text-[#0070f3]",
   ready: "border-emerald-500/40 text-emerald-400",
-};
+
+  failed: "border-destructive/50 bg-destructive/10 text-red-400",};
 
 export function PreviewPane({
   shot,

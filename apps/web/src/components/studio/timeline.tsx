@@ -9,6 +9,8 @@ const blockTone: Record<Shot["status"], string> = {
   keyframe: "border-amber-500/40 bg-amber-500/10 text-amber-300",
   generating: "border-[#0070f3]/50 bg-[#0070f3]/15 text-[#6cb8ff] animate-pulse",
   ready: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
+  failed:
+    "border-destructive/60 bg-destructive/10 text-red-300 [background-image:repeating-linear-gradient(45deg,transparent_0px,transparent_4px,rgba(239,68,68,0.12)_4px,rgba(239,68,68,0.12)_8px)]",
 };
 
 export function Timeline({

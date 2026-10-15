@@ -8,6 +8,7 @@ const statusTone: Record<ShotStatus, string> = {
   keyframe: "text-amber-400",
   generating: "text-[#0070f3]",
   ready: "text-emerald-400",
+  failed: "text-red-400",
 };
 
 export function ShotList({
@@ -44,7 +45,9 @@ export function ShotList({
                     ? "bg-[#0070f3]/10 text-[#0070f3]"
                     : shot.status === "keyframe"
                       ? "bg-amber-500/10 text-amber-400"
-                      : "bg-muted text-muted-foreground",
+                      : shot.status === "failed"
+                        ? "bg-destructive/15 text-red-400"
+                        : "bg-muted text-muted-foreground",
               )}
             >
               {shot.status === "generating" ? (

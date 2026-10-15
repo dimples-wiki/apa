@@ -85,6 +85,8 @@ export default function ProjectStudioPage() {
       number: next,
       title: `第 ${next} 集`,
       logline: "",
+      synopsis: "",
+      scriptScenes: [],
       shots: [],
     };
     setEpisodes((eps) => [...eps, ep]);
