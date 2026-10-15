@@ -75,12 +75,12 @@ export function AppSidebar() {
           <SidebarMenuButton
             size="lg"
             className="pointer-events-none group-data-[collapsible=icon]:hidden"
-            tooltip="FilmStudio"
+            tooltip="APA"
           >
             <div className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-md bg-foreground text-background">
               <Clapperboard className="size-4" />
             </div>
-            <span className="text-[15px] font-semibold tracking-tight">FilmStudio</span>
+            <span className="text-[15px] font-semibold tracking-tight">APA</span>
           </SidebarMenuButton>
           <SidebarTrigger className="size-7 shrink-0 text-sidebar-foreground/60" />
         </div>

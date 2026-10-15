@@ -53,7 +53,7 @@ export function AppShell() {
             <div className="flex size-6 items-center justify-center rounded bg-foreground text-background">
               <Clapperboard className="size-3.5" />
             </div>
-            <span className="text-[14px] font-semibold tracking-tight">FilmStudio</span>
+            <span className="text-[14px] font-semibold tracking-tight">APA</span>
           </div>
         </header>
         <div className="pb-14 md:pb-0">

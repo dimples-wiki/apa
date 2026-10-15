@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Plus } from "lucide-react";
-import type { Scene } from "@filmstudio/shared";
+import type { Scene } from "@dimples/apa-shared";
 import { PageHeader } from "@/components/layout/page-header";
 import {
   CardGridSkeleton,

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { ArrowUpRight, Plus } from "lucide-react";
-import type { Project, ProjectStatus } from "@filmstudio/shared";
-import { PROJECT_STATUS_LABELS } from "@filmstudio/shared";
+import type { Project, ProjectStatus } from "@dimples/apa-shared";
+import { PROJECT_STATUS_LABELS } from "@dimples/apa-shared";
 import { cn, coverGrid } from "@/lib/utils";
 import { PageHeader } from "@/components/layout/page-header";
 import {

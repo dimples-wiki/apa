@@ -1,5 +1,5 @@
 {
-  "name": "@filmstudio/web",
+  "name": "@dimples/apa-web",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
     "preview": "vp preview"
   },
   "dependencies": {
-    "@filmstudio/shared": "workspace:*",
+    "@dimples/apa-shared": "workspace:*",
     "@fontsource-variable/geist": "catalog:",
     "@fontsource-variable/inter": "^5.2.0",
     "@radix-ui/react-avatar": "^1.1.0",

@@ -1,4 +1,4 @@
-import { mockActors, mockCostumes, mockProjects, mockScenes } from "@filmstudio/shared";
+import { mockActors, mockCostumes, mockProjects, mockScenes } from "@dimples/apa-shared";
 
 /** 静态部署（无后端）时回退到内置演示数据 */
 async function withFallback<T>(path: string, fallback: T): Promise<T> {

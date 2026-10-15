@@ -5,12 +5,16 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { actors, costumes, projects, scenes } from "./data.ts";
 
-const webDist = fileURLToPath(new URL("../../web/dist", import.meta.url));
+import { existsSync } from "node:fs";
+
+const bundledPublic = fileURLToPath(new URL("./public", import.meta.url));
+const devWebDist = fileURLToPath(new URL("../../web/dist", import.meta.url));
+const webDist = existsSync(bundledPublic) ? bundledPublic : devWebDist;
 
 export function startServer(opts: { port: number; hostname: string }) {
   const app = new Hono();
 
-  app.get("/api/health", (c) => c.json({ ok: true, service: "filmstudio" }));
+  app.get("/api/health", (c) => c.json({ ok: true, service: "apa" }));
   app.get("/api/projects", (c) => c.json(projects));
   app.get("/api/actors", (c) => c.json(actors));
   app.get("/api/scenes", (c) => c.json(scenes));

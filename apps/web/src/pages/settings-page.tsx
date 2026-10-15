@@ -1,7 +1,7 @@
 import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { APP_VERSION } from "@filmstudio/shared";
+import { APP_VERSION } from "@dimples/apa-shared";
 import { getTheme, setTheme, type Theme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/layout/page-header";

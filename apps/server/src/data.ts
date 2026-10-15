@@ -1,4 +1,4 @@
-import { mockProjects, mockActors, mockScenes, mockCostumes } from "@filmstudio/shared";
+import { mockProjects, mockActors, mockScenes, mockCostumes } from "@dimples/apa-shared";
 
 export const projects = mockProjects;
 export const actors = mockActors;

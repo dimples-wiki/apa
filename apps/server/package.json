@@ -1,23 +1,32 @@
 {
-  "name": "@filmstudio/server",
-  "version": "0.0.0",
-  "private": true,
+  "name": "@dimples/apa",
+  "version": "0.1.0-dev.2",
+  "description": "APA — AI Pipeline for Auteur. 启动 FilmStudio Web 服务",
   "bin": {
-    "filmstudio": "./bin/filmstudio.js"
+    "apa": "./dist/cli.mjs"
   },
+  "files": [
+    "dist"
+  ],
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "dev": "node --watch src/cli.ts serve --port 4310",
-    "start": "node src/cli.ts serve"
+    "dev": "node --watch src/cli.ts serve --port 4310 --host 0.0.0.0",
+    "start": "node src/cli.ts serve",
+    "build": "rm -rf dist && tsdown && mkdir -p dist/public && cp -R ../web/dist/. dist/public/",
+    "prepublishOnly": "pnpm build",
+    "prepack": "pnpm --filter @dimples/apa-web build && pnpm build"
   },
   "dependencies": {
-    "@filmstudio/shared": "workspace:*",
     "@hono/node-server": "^1.14.0",
     "commander": "^14.0.0",
     "hono": "^4.9.0"
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "tsdown": "catalog:",
     "typescript": "catalog:"
   },
   "engines": {
