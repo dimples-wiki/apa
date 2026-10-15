@@ -29,12 +29,13 @@ function ActorCard({ actor }: { actor: Actor }) {
             />
           ) : (
             <div
-              className="flex size-14 shrink-0 items-center justify-center rounded-full ring-1 ring-foreground/10"
+              className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-white/20"
               style={{
-                backgroundColor: `oklch(0.92 0.03 ${hueOf(actor.name.codePointAt(0) ?? 0)})`,
+                backgroundColor: `oklch(0.55 0.1 ${hueOf(actor.name.codePointAt(0) ?? 0)})`,
+                backgroundImage: `radial-gradient(42px 32px at 68% 28%, oklch(0.75 0.1 ${hueOf(actor.name.codePointAt(0) ?? 0)}), transparent 74%)`,
               }}
             >
-              <span className="text-lg font-medium text-foreground/70">
+              <span className="text-lg font-medium text-white/90">
                 {actor.name.slice(0, 1)}
               </span>
             </div>

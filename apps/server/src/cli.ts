@@ -8,21 +8,26 @@ const program = new Command();
 
 program.name("apa").description("APA — AI Pipeline for Auteur").version(APP_VERSION);
 
+function startServe(opts: { port: string; host: string; open: boolean }) {
+  const port = Number.parseInt(opts.port, 10);
+  const url = `http://${opts.host}:${port}`;
+  startServer({ port, hostname: opts.host });
+  console.log(`\n  APA 已启动 → ${url}\n`);
+  if (opts.open) {
+    const opener = process.platform === "darwin" ? "open" : "xdg-open";
+    spawn(opener, [url], { detached: true, stdio: "ignore" }).unref();
+  }
+}
+
 program
   .command("serve")
   .description("启动 APA Web 服务，通过浏览器访问")
   .option("-p, --port <port>", "监听端口", "4310")
   .option("-H, --host <host>", "监听地址", "127.0.0.1")
   .option("--open", "启动后自动打开浏览器", false)
-  .action(async (opts: { port: string; host: string; open: boolean }) => {
-    const port = Number.parseInt(opts.port, 10);
-    const url = `http://${opts.host}:${port}`;
-    startServer({ port, hostname: opts.host });
-    console.log(`\n  APA 已启动 → ${url}\n`);
-    if (opts.open) {
-      const opener = process.platform === "darwin" ? "open" : "xdg-open";
-      spawn(opener, [url], { detached: true, stdio: "ignore" }).unref();
-    }
-  });
+  .action(startServe);
+
+// 无子命令时默认启动服务
+program.action(() => startServe({ port: "4310", host: "127.0.0.1", open: false }));
 
 program.parse();
