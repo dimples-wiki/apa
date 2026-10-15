@@ -25,7 +25,6 @@ export const projects: Project[] = [
   },
   {
     id: "p-006",
-    cover: "/covers/p-006.jpg",
     name: "春潮",
     logline: "小镇游泳队的天才少女与固执教练，向全国冠军发起最后一次冲击。",
     genre: "运动励志",
@@ -47,7 +46,6 @@ export const projects: Project[] = [
   },
   {
     id: "p-004",
-    cover: "/covers/p-004.jpg",
     name: "山海食肆",
     logline: "一家深夜开张的小饭馆，每位客人都会带来一段山精海怪的故事。",
     genre: "奇幻单元剧",
@@ -92,7 +90,6 @@ export const actors: Actor[] = [
   },
   {
     id: "a-003",
-    avatar: "/avatars/a-003.jpg",
     name: "陆离",
     persona: "古装贵公子气质，一柄长剑耍得行云流水，眼神戏尤其出彩",
     tags: ["古装", "武侠"],
@@ -102,7 +99,6 @@ export const actors: Actor[] = [
   },
   {
     id: "a-004",
-    avatar: "/avatars/a-004.jpg",
     name: "苏晚晴",
     persona: "江南梅雨养出来的温婉声线，一句沪语问候就能立住角色",
     tags: ["年代", "家庭"],
@@ -122,7 +118,6 @@ export const actors: Actor[] = [
   },
   {
     id: "a-006",
-    avatar: "/avatars/a-006.jpg",
     name: "林小满",
     persona: "自带笑点的元气少女音色，接梗速度比谁都快",
     tags: ["奇幻", "喜剧"],
