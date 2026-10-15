@@ -1,6 +1,6 @@
 {
   "name": "@dimples/apa",
-  "version": "0.1.0-dev.2",
+  "version": "0.1.0-dev.3",
   "description": "APA — AI Pipeline for Auteur. 启动 FilmStudio Web 服务",
   "bin": {
     "apa": "./dist/cli.mjs"
