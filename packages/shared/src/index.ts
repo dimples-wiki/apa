@@ -64,3 +64,5 @@ export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
 };
 
 export { mockProjects, mockActors, mockScenes, mockCostumes } from "./mock";
+
+export * from "./studio";

@@ -1,4 +1,5 @@
 import { Toaster } from "@/components/ui/sonner";
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { AppShell } from "@/components/layout/app-shell";
 import { ActorsPage } from "@/pages/actors-page";
@@ -7,6 +8,8 @@ import { NotFoundPage } from "@/pages/not-found";
 import { ProjectsPage } from "@/pages/projects-page";
 import { ScenesPage } from "@/pages/scenes-page";
 import { SettingsPage } from "@/pages/settings-page";
+
+const ProjectStudioPage = lazy(() => import("@/pages/project-studio"));
 
 export default function App() {
   return (
@@ -18,6 +21,14 @@ export default function App() {
           <Route path="/actors" element={<ActorsPage />} />
           <Route path="/scenes" element={<ScenesPage />} />
           <Route path="/costumes" element={<CostumesPage />} />
+          <Route
+            path="/projects/:id/studio"
+            element={
+              <Suspense fallback={null}>
+                <ProjectStudioPage />
+              </Suspense>
+            }
+          />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>

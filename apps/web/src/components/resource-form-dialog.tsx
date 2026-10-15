@@ -110,7 +110,7 @@ export function ResourceFormDialog({
         onKeyDown={(e) => {
           if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
             e.preventDefault();
-            handleSubmit();
+            void handleSubmit();
           }
         }}
       >
