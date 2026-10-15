@@ -7,6 +7,8 @@ export type ProjectStatus = "planning" | "writing" | "shooting" | "post" | "rele
 export interface Project {
   id: string;
   name: string;
+  /** 封面图（/public/covers） */
+  cover?: string;
   logline: string;
   genre: string;
   status: ProjectStatus;
@@ -20,6 +22,8 @@ export interface Project {
 export interface Actor {
   id: string;
   name: string;
+  /** 头像（/public/avatars） */
+  avatar?: string;
   /** AI 形象描述 */
   persona: string;
   tags: string[];

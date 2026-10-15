@@ -33,22 +33,36 @@ function ProjectCard({ project }: { project: Project }) {
 
   return (
     <Card className="group cursor-pointer gap-0 overflow-hidden py-0 transition-colors hover:border-foreground/25">
-      <CardHeader className="relative h-16 border-b p-4 sm:h-24">
-        <div className={`absolute inset-0 ${coverGrid}`} />
-        <span
-          className="absolute -bottom-3 right-4 text-[64px] leading-none font-semibold tracking-tight select-none [mask-image:linear-gradient(to_bottom,black_45%,transparent_96%)]"
-          style={{ color: "var(--cover-word)" }}
-        >
-          {project.name.slice(0, 1)}
-        </span>
+      <CardHeader className="relative h-16 overflow-hidden border-b p-4 sm:h-24">
+        {project.cover ? (
+          <>
+            <img
+              src={project.cover}
+              alt=""
+              loading="lazy"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/15 to-transparent" />
+          </>
+        ) : (
+          <>
+            <div className={`absolute inset-0 ${coverGrid}`} />
+            <span
+              className="absolute -bottom-3 right-4 text-[64px] leading-none font-semibold tracking-tight select-none [mask-image:linear-gradient(to_bottom,black_45%,transparent_96%)]"
+              style={{ color: "var(--cover-word)" }}
+            >
+              {project.name.slice(0, 1)}
+            </span>
+          </>
+        )}
         <Badge
           variant="secondary"
-          className="relative w-fit gap-1.5 border bg-muted text-[11px] font-medium"
+          className="relative w-fit gap-1.5 border bg-background/75 text-[11px] font-medium backdrop-blur-sm"
         >
           <span className={`size-1.5 rounded-full ${statusDot[project.status]}`} />
           {PROJECT_STATUS_LABELS[project.status]}
         </Badge>
-        <ArrowUpRight className="absolute top-3 right-3 size-4 text-foreground/70 opacity-0 transition-opacity group-hover:opacity-100" />
+        <ArrowUpRight className="absolute top-3 right-3 z-10 size-4 text-white/90 opacity-0 transition-opacity group-hover:opacity-100" />
       </CardHeader>
 
       <CardContent className="space-y-2 p-4">
