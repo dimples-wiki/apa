@@ -1,4 +1,13 @@
-import type { Actor, Costume, Project, Scene } from "@filmstudio/shared";
+import { mockActors, mockCostumes, mockProjects, mockScenes } from "@filmstudio/shared";
+
+/** 静态部署（无后端）时回退到内置演示数据 */
+async function withFallback<T>(path: string, fallback: T): Promise<T> {
+  try {
+    return await request<T>(path);
+  } catch {
+    return fallback;
+  }
+}
 
 async function request<T>(path: string): Promise<T> {
   const res = await fetch(path);
@@ -9,8 +18,8 @@ async function request<T>(path: string): Promise<T> {
 }
 
 export const api = {
-  projects: () => request<Project[]>("/api/projects"),
-  actors: () => request<Actor[]>("/api/actors"),
-  scenes: () => request<Scene[]>("/api/scenes"),
-  costumes: () => request<Costume[]>("/api/costumes"),
+  projects: () => withFallback("/api/projects", mockProjects),
+  actors: () => withFallback("/api/actors", mockActors),
+  scenes: () => withFallback("/api/scenes", mockScenes),
+  costumes: () => withFallback("/api/costumes", mockCostumes),
 };

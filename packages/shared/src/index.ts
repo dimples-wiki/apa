@@ -62,3 +62,5 @@ export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
   post: "后期制作",
   released: "已发布",
 };
+
+export { mockProjects, mockActors, mockScenes, mockCostumes } from "./mock";
