@@ -9,7 +9,7 @@ import {
   ListToolbar,
 } from "@/components/layout/list-state";
 import { Button } from "@/components/ui/button";
-import { hueOf } from "@/lib/utils";
+import { assetUrl, hueOf } from "@/lib/utils";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
 import { useApi } from "@/hooks/use-api";
@@ -22,7 +22,7 @@ function ActorCard({ actor }: { actor: Actor }) {
         <div className="flex items-center gap-3">
           {actor.avatar ? (
             <img
-              src={actor.avatar}
+              src={assetUrl(actor.avatar)}
               alt={actor.name}
               loading="lazy"
               className="size-14 shrink-0 rounded-full object-cover ring-1 ring-foreground/10"

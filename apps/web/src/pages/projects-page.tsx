@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { ArrowUpRight, Plus } from "lucide-react";
 import type { Project, ProjectStatus } from "@dimples/apa-shared";
 import { PROJECT_STATUS_LABELS } from "@dimples/apa-shared";
-import { cn, coverGrid } from "@/lib/utils";
+import { assetUrl, cn, coverGrid } from "@/lib/utils";
 import { PageHeader } from "@/components/layout/page-header";
 import {
   CardGridSkeleton,
@@ -37,7 +37,7 @@ function ProjectCard({ project }: { project: Project }) {
         {project.cover ? (
           <>
             <img
-              src={project.cover}
+              src={assetUrl(project.cover)}
               alt=""
               loading="lazy"
               className="absolute inset-0 h-full w-full object-cover"

@@ -4,7 +4,7 @@ import type { Actor, Costume, Project, Scene } from "./index";
 export const mockProjects: Project[] = [
   {
     id: "p-001",
-    cover: "/covers/p-001.jpg",
+    cover: "covers/p-001.jpg",
     name: "长安十二时辰 · 重制",
     logline: "上元节前夕，死囚张小敬受命拯救长安城，十二个时辰内揪出隐藏的阴谋。",
     genre: "古装悬疑",
@@ -15,7 +15,7 @@ export const mockProjects: Project[] = [
   },
   {
     id: "p-002",
-    cover: "/covers/p-002.jpg",
+    cover: "covers/p-002.jpg",
     name: "星际摆渡人",
     logline: "末日地球最后一位星际摆渡人，驾驶旧飞船护送三千沉睡者前往新家园。",
     genre: "科幻",
@@ -36,7 +36,7 @@ export const mockProjects: Project[] = [
   },
   {
     id: "p-003",
-    cover: "/covers/p-003.jpg",
+    cover: "covers/p-003.jpg",
     name: "弄堂风云",
     logline: "九十年代上海弄堂里，两家理发店三代人的恩怨与和解。",
     genre: "年代剧",
@@ -57,7 +57,7 @@ export const mockProjects: Project[] = [
   },
   {
     id: "p-005",
-    cover: "/covers/p-005.jpg",
+    cover: "covers/p-005.jpg",
     name: "无声证词",
     logline: "一位失聪法医通过微表情与物证破译凶案真相，却卷入旧日悬案。",
     genre: "刑侦",
@@ -71,7 +71,7 @@ export const mockProjects: Project[] = [
 export const mockActors: Actor[] = [
   {
     id: "a-001",
-    avatar: "/avatars/a-001.jpg",
+    avatar: "avatars/a-001.jpg",
     name: "沈青",
     persona: "眉眼冷峻的刑侦专家，惯用低沉嗓音压住全场；长于审讯对手戏",
     tags: ["悬疑", "正剧"],
@@ -81,7 +81,7 @@ export const mockActors: Actor[] = [
   },
   {
     id: "a-002",
-    avatar: "/avatars/a-002.jpg",
+    avatar: "avatars/a-002.jpg",
     name: "白鹿",
     persona: "清冷少女感，台词干净利落；在失重与奔跑戏里肢体控制力惊人",
     tags: ["科幻", "青春"],
@@ -109,7 +109,7 @@ export const mockActors: Actor[] = [
   },
   {
     id: "a-005",
-    avatar: "/avatars/a-005.jpg",
+    avatar: "avatars/a-005.jpg",
     name: "段飞白",
     persona: "满脸风霜的硬汉，不用台词也能演完整场内心戏",
     tags: ["刑侦", "硬汉"],

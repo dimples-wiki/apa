@@ -39,3 +39,8 @@ export function sceneHue(timeOfDay: string, index = 0): number {
 export function actorHueOf(name: string): number {
   return hueOf(name.codePointAt(0) ?? 0);
 }
+
+/** 拼接部署 base 前缀的静态资源地址（GitHub Pages 子路径部署兼容） */
+export function assetUrl(path: string): string {
+  return `${import.meta.env.BASE_URL}${path}`;
+}
