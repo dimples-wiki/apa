@@ -85,7 +85,7 @@ function ActorCard({ actor, index }: { actor: Actor; index: number }) {
           ))}
         </div>
       </CardContent>
-      <CardFooter className="items-center justify-between border-t px-4 pt-3 text-xs text-muted-foreground tabular-nums sm:text-[11px]">
+      <CardFooter className="items-center justify-between border-t px-4 py-3 text-xs text-muted-foreground tabular-nums sm:text-[11px]">
         <span>参演 {actor.projectCount} 个项目</span>
         <span className="text-muted-foreground/70">
           {new Date(actor.createdAt).toLocaleDateString("zh-CN", {
