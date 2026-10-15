@@ -9,7 +9,8 @@
     "build": "vp run -r build",
     "check": "vp check",
     "serve": "node apps/server/src/cli.ts serve --port 4310",
-    "deploy:nas": "bash scripts/deploy-nas.sh"
+    "deploy:nas": "bash scripts/deploy-nas.sh",
+    "deploy:pages": "bash scripts/deploy-pages.sh"
   },
   "devDependencies": {
     "vite-plus": "catalog:"
