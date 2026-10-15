@@ -16,6 +16,14 @@ export function startServer(opts: { port: number; hostname: string }) {
   app.get("/api/scenes", (c) => c.json(scenes));
   app.get("/api/costumes", (c) => c.json(costumes));
 
+  // 静态资源长缓存（文件更新随构建产物版本变化）
+  app.use("*", async (c, next) => {
+    await next();
+    if (!c.req.path.startsWith("/api")) {
+      c.header("Cache-Control", "public, max-age=604800");
+    }
+  });
+
   // 生产模式：托管前端构建产物，其余路径回退到 SPA 入口
   app.use("*", serveStatic({ root: webDist }));
   app.get("*", async (c) => {
