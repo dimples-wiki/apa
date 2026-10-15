@@ -327,9 +327,9 @@ importers:
 
   packages/shared:
     devDependencies:
-      typescript:
+      tsdown:
         specifier: 'catalog:'
-        version: 7.0.2
+        version: 0.23.1(typescript@7.0.2)
 
 packages:
 

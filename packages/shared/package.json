@@ -1,15 +1,26 @@
 {
   "name": "@dimples/apa-shared",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.1.0-dev.2",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
   },
   "scripts": {
-    "check": "tsc --noEmit"
+    "build": "tsdown"
   },
   "devDependencies": {
-    "typescript": "catalog:"
+    "tsdown": "catalog:"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=22.18.0"
   }
 }

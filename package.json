@@ -6,7 +6,7 @@
   "scripts": {
     "ready": "vp check && vp run -r build",
     "dev": "vp run -r --parallel dev",
-    "build": "vp run -r build",
+    "build": "pnpm -r build",
     "check": "vp check",
     "serve": "node apps/server/src/cli.ts serve --port 4310",
     "deploy:nas": "bash scripts/deploy-nas.sh",

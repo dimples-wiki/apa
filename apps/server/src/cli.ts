@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { spawn } from "node:child_process";
 import { Command } from "commander";
 import { APP_VERSION } from "@dimples/apa-shared";

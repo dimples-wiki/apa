@@ -1,6 +1,6 @@
 {
   "name": "@dimples/apa",
-  "version": "0.1.0-dev.3",
+  "version": "0.1.0-dev.9",
   "description": "APA — AI Pipeline for Auteur. 启动 FilmStudio Web 服务",
   "bin": {
     "apa": "./dist/cli.mjs"
@@ -22,7 +22,8 @@
   "dependencies": {
     "@hono/node-server": "^1.14.0",
     "commander": "^14.0.0",
-    "hono": "^4.9.0"
+    "hono": "^4.9.0",
+    "@dimples/apa-shared": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",
