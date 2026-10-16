@@ -252,6 +252,8 @@ export interface Segment {
   billedAttempts: number;
   /** 审核失败次数（不计费） */
   failedAttempts: number;
+  /** 失败归因（failed 段必须归因后才允许重试） */
+  attributedFailure?: FailureMode;
   /** 累计成本（元） */
   cost?: number;
   variants: VideoVariant[];

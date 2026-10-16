@@ -99,35 +99,34 @@ export default function ProjectStudioPage() {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className="flex cursor-help items-center gap-1.5">
-                    <span
-                      className={cn(
-                        budget.estimate > budget.cap * 0.8 ? "text-red-400" : "text-foreground/75",
-                      )}
-                    >
-                      {formatMoney(stats.cost)}
-                    </span>
+                    <span className="text-foreground/75">{formatMoney(stats.cost)}</span>
                     <span className="relative h-1 w-12 overflow-hidden rounded-full bg-muted">
                       <span
-                        className={cn(
-                          "absolute inset-y-0 left-0 rounded-full",
-                          budget.estimate > budget.cap * 0.8 ? "bg-red-400" : "bg-emerald-500/70",
-                        )}
+                        className="absolute inset-y-0 left-0 rounded-full bg-emerald-500/70"
                         style={{ width: `${Math.min(100, (budget.spent / (budget.cap || 1)) * 100)}%` }}
                       />
                       <span
-                        className="absolute inset-y-0 w-px bg-foreground/60"
+                        className={cn(
+                          "absolute inset-y-0 w-px",
+                          budget.estimate > budget.cap * 0.8 ? "bg-red-400" : "bg-foreground/60",
+                        )}
                         style={{ left: `${Math.min(100, (budget.estimate / (budget.cap || 1)) * 100)}%` }}
                       />
                     </span>
-                    <span className="text-muted-foreground/60">
-                      / {formatMoney(budget.cap)}
+                    <span
+                      className={cn(
+                        budget.estimate > budget.cap * 0.8 ? "text-red-400" : "text-muted-foreground/60",
+                      )}
+                    >
+                      预估 {formatMoney(budget.estimate)}
                     </span>
+                    <span className="text-muted-foreground/60">/ {formatMoney(budget.cap)}</span>
                   </span>
                 </TooltipTrigger>
                 <TooltipContent className="text-[11px] leading-4">
                   已花 {formatMoney(budget.spent)}（仅成功计费）· 完成预估{" "}
                   {formatMoney(budget.estimate)}（待生成段 ×2 重试）· 上限 {formatMoney(budget.cap)}{" "}
-                  （全部段 ×3）· 超上限 80% 转红
+                  （全部段 ×3）· 预估超上限 80% 转红
                 </TooltipContent>
               </Tooltip>
               <span className="text-border">|</span>

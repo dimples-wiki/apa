@@ -312,11 +312,13 @@ function SegActions({
               open();
             }}
           >
-            <RefreshCcw className="size-3" />
-            重制
+            <PenLineIcon className="size-3" />
+            重写
           </Button>
         </TooltipTrigger>
-        <TooltipContent>首帧或剧本已变——重写提示词后重制</TooltipContent>
+        <TooltipContent>
+          提示词已过期——先在抽屉里重写保存，才解锁重制（防止直接烧钱）
+        </TooltipContent>
       </Tooltip>
     );
   }
@@ -357,8 +359,8 @@ function InsertRow({
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="relative flex h-6 items-center px-4">
-      <div className="flex w-full items-center gap-2 opacity-0 transition-opacity hover:opacity-100 [.group\\/segrow:hover_&]:opacity-100">
+    <div className="relative flex h-7 items-center px-3 sm:px-4">
+      <div className="flex w-full items-center gap-2 sm:opacity-0 sm:transition-opacity sm:group-hover/segrow:opacity-100">
         <button
           type="button"
           onClick={() => setOpen(!open)}
@@ -573,17 +575,33 @@ export function ShotListTable({
           </Tooltip>
         )}
         <div className="ml-auto flex items-center gap-1.5">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 gap-1.5 text-[12px]"
-            onClick={studio.batchRetryFailed}
-            disabled={!episode.segments.some((s) => s.status === "failed" || s.status === "stale")}
-          >
-            <RefreshCcw className="size-3.5" />
-            <span className="hidden sm:inline">重试失败/待重制</span>
-            <span className="sm:hidden">重试</span>
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 gap-1.5 text-[12px]"
+                onClick={studio.batchRetryFailed}
+                disabled={
+                  studio.unattributedFailed.length > 0 ||
+                  !episode.segments.some(
+                    (s) =>
+                      (s.status === "stale" || (s.status === "failed" && s.attributedFailure)) &&
+                      !s.promptStale,
+                  )
+                }
+              >
+                <RefreshCcw className="size-3.5" />
+                <span className="hidden sm:inline">重试失败/待重制</span>
+                <span className="sm:hidden">重试</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {studio.unattributedFailed.length > 0
+                ? `先归因失败段：${studio.unattributedFailed.map((s) => s.code).join("、")}（归因→重写→重制）`
+                : "重试已归因的失败段与待重制段（继承参数）"}
+            </TooltipContent>
+          </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -688,11 +706,11 @@ export function ShotListTable({
                       className={cn(
                         seg.billedAttempts + seg.failedAttempts >= 15
                           ? "text-red-400"
-                          : seg.billedAttempts + seg.failedAttempts >= 12
+                          : seg.billedAttempts + seg.failedAttempts >= 10
                             ? "text-amber-400"
                             : "",
                       )}
-                      title="预算：单镜累计生成（计费+失败）/15，达到 15 次建议换镜重写"
+                      title="预算梯度：单镜累计生成（计费+失败）/15——≥10 转黄预警，15 封顶禁止再生成，必须换镜重写"
                     >
                       {seg.resolution} · 计费 {seg.billedAttempts} · 失败 {seg.failedAttempts} ·{" "}
                       {seg.billedAttempts + seg.failedAttempts}/15

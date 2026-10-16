@@ -139,12 +139,13 @@ export function useStudio() {
     [episode, patchKeyframe, commit],
   );
 
-  /** 模拟图生视频：仅当首帧已定稿且提示词未过期（两阶段闸门 + promptStale 校验）；完成后注入候选并计费 */
+  /** 模拟图生视频：仅当首帧已定稿且提示词未过期且预算未烧穿（15 次封顶）；完成后注入候选并计费 */
   const generateSegment = useCallback(
     (segId: string) => {
       const seg = episode.segments.find((s) => s.id === segId);
       if (!seg || seg.status === "generating" || seg.status === "ready") return;
       if (seg.promptStale) return; // 提示词待重写——重写前不许烧钱
+      if (seg.billedAttempts + seg.failedAttempts >= 15) return; // 单镜预算封顶——必须换镜重写
       const kf = episode.keyframes.find((k) => k.id === seg.fromKeyframeId);
       if (!kf || kf.status !== "picked") return; // 首帧未定稿——闸门拦截
       patchSegment(segId, { status: "generating" });
@@ -313,12 +314,23 @@ export function useStudio() {
     targets.forEach((s, i) => setTimeout(() => generateSegment(s.id), i * 250));
   }, [episode, gateOpen, generateSegment]);
 
-  /** 批量重试：仅重制「提示词未过期且首帧已定稿」的失败/待重制段（闸门硬拦截） */
+  /** 失败归因（failed 段必须归因后才能进入批量重试） */
+  const attributeFailure = useCallback(
+    (segId: string, mode: FailureMode) => {
+      patchSegment(segId, { attributedFailure: mode });
+    },
+    [patchSegment],
+  );
+
+  /** 批量重试：失败段需已归因、提示词未过期、首帧已定稿（归因→重写→重制 纪律） */
+  const unattributedFailed = episode.segments.filter(
+    (s) => s.status === "failed" && !s.attributedFailure,
+  );
   const batchRetryFailed = useCallback(() => {
     episode.segments
       .filter(
         (s) =>
-          (s.status === "failed" || s.status === "stale") &&
+          (s.status === "stale" || (s.status === "failed" && s.attributedFailure)) &&
           !s.promptStale &&
           episode.keyframes.find((k) => k.id === s.fromKeyframeId)?.status === "picked",
       )
@@ -480,6 +492,8 @@ export function useStudio() {
     batchGenerateKeyframes,
     batchGenerateSegments,
     batchRetryFailed,
+    attributeFailure,
+    unattributedFailed,
     gateOpen,
     stats,
     canUndo: past.length > 0,

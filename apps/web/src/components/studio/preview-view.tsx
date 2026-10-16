@@ -309,11 +309,15 @@ export function PreviewView({
                 {episode.segments.map((seg) => {
                   const active = seg.id === activeSeg?.id;
                   return (
-                    <button
-                      key={seg.id}
-                      type="button"
-                      onClick={() => studio.setActiveSegmentId(seg.id)}
-                      style={{ flexGrow: seg.duration, flexBasis: `${seg.duration * 16}px` }}
+                  <button
+                    key={seg.id}
+                    type="button"
+                    onClick={() => {
+                      studio.setActiveSegmentId(seg.id);
+                      studio.setActiveKeyframeId(null);
+                      onOpenCandidates();
+                    }}
+                    style={{ flexGrow: seg.duration, flexBasis: `${seg.duration * 16}px` }}
                       className={cn(
                         "group relative flex min-w-20 flex-col justify-between overflow-hidden rounded border p-1.5 text-left transition-opacity",
                         segBlockStyle[seg.status],

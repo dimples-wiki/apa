@@ -35,7 +35,7 @@ function VariantMetaLine({ v }: { v: ImageVariant | VideoVariant }) {
     .map(([k, val]) => `${k}=${val}`)
     .join(" · ");
   return (
-    <p className="mt-1 text-[10px] leading-4 tabular-nums text-muted-foreground/70">
+    <p className="mt-1 truncate text-[10px] leading-4 tabular-nums text-muted-foreground/70">
       seed {v.seed ?? "—"} · {v.modelVersion} · {params || "默认参数"} ·{" "}
       {v.cost !== undefined ? formatMoney(v.cost) : "审核失败不计费"} ·{" "}
       {new Date(v.createdAt).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}
@@ -138,9 +138,13 @@ export function CandidateDrawer({
 
   const model = seg ? getModel(seg.modelId) : null;
   const unitCost = seg ? estimateClipCost(seg.modelId, seg.resolution, seg.duration) : 0;
+  const promptDirty = !isKf && seg !== undefined && promptDraft !== seg.videoPrompt;
+  const fromKf = seg ? episode.keyframes.find((k) => k.id === seg.fromKeyframeId) : undefined;
   const canGenerateSeg =
     seg &&
     !seg.promptStale &&
+    !promptDirty &&
+    (seg.billedAttempts + seg.failedAttempts < 15) &&
     episode.keyframes.find((k) => k.id === seg.fromKeyframeId)?.status === "picked";
 
   return (
@@ -156,7 +160,9 @@ export function CandidateDrawer({
             {isKf ? `关键帧 ${kf?.code}` : `演绎段 ${seg?.code}`} · 编辑与选优
           </SheetTitle>
           <SheetDescription className="text-[11px] leading-4">
-            k = 采纳聚焦候选 · 淘汰必须归因（驱动重试策略与失败报表）· j 点击淘汰下拉
+            {isKf
+              ? "k = 采纳聚焦候选 · 淘汰必须归因（驱动重试策略与失败报表）· 点击淘汰下拉"
+              : "k = 采纳候选片段 · 淘汰/归因驱动重试策略与失败报表 · 点击淘汰下拉"}
           </SheetDescription>
         </SheetHeader>
 
@@ -168,11 +174,18 @@ export function CandidateDrawer({
                 {isKf ? "生图提示词" : "演绎提示词（给图生视频模型）"}
               </Label>
               {promptDraft !== (isKf ? kf?.imagePrompt : seg?.videoPrompt) ? (
-                <Button size="sm" className="h-6 gap-1 px-2 text-[11px]" onClick={savePrompt}>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-amber-400">
+                  {isKf
+                    ? "未保存更改"
+                    : "未保存更改 · 保存后将置为待重写，需重制才能出新片"}
+                </span>
+                <Button size="sm" className="ml-auto h-6 gap-1 px-2 text-[11px]" onClick={savePrompt}>
                   <Check className="size-3" />
                   保存
                 </Button>
-              ) : null}
+              </div>
+            ) : null}
             </div>
             <Textarea
               value={promptDraft}
@@ -198,6 +211,23 @@ export function CandidateDrawer({
           {/* ── 段：档位联动 + 对白策略 + 计费明细 ── */}
           {!isKf && seg && model ? (
             <div className="grid gap-2.5 rounded-lg border p-3">
+              {/* 首帧绑定（闸门可见化） */}
+              <div className="flex items-center gap-2 text-[11px]">
+                <span className="text-muted-foreground">首帧绑定</span>
+                {fromKf ? (
+                  <span
+                    className={cn(
+                      "flex items-center gap-1 rounded-full border px-2 py-0.5 tabular-nums",
+                      fromKf.status === "picked"
+                        ? "border-emerald-500/50 text-emerald-400"
+                        : "border-amber-500/50 text-amber-400",
+                    )}
+                  >
+                    {fromKf.code}
+                    {fromKf.status === "picked" ? " · 已定稿，可生成" : ` · ${fromKf.status === "generating" ? "生成中" : "未定稿，生成已禁用"}`}
+                  </span>
+                ) : null}
+              </div>
               <div className="grid grid-cols-3 gap-1.5">
                 <div className="grid gap-1">
                   <Label className="text-[10px] text-muted-foreground">模型</Label>
@@ -282,7 +312,8 @@ export function CandidateDrawer({
                       </span>
                     </TooltipTrigger>
                     <TooltipContent className="text-[11px]">
-                      {model.pricing.tokenPricePerMillion} 元/百万 tokens · 仅成功计费
+                      {seg.resolution}·{seg.duration}s → tokens×{model.pricing.tokenPricePerMillion}{" "}
+                      元/百万 · 仅成功计费
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -297,23 +328,44 @@ export function CandidateDrawer({
           {/* ── 失败归因 ── */}
           {!isKf && seg?.status === "failed" ? (
             <div className="rounded-lg border border-destructive/30 bg-destructive/[0.06] p-3">
-              <p className="text-[12px] font-medium text-red-300">失败归因（{seg.failedAttempts} 次失败 · 计费 ¥0）</p>
-              <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
-                选择失败原因后按建议动作重写，再重制——盲重试只会继续烧配额。
+              <p className="text-[12px] font-medium text-red-300">
+                失败归因（{seg.failedAttempts} 次失败 · 计费 ¥0）
               </p>
-              <div className="mt-2 flex flex-wrap gap-1">
-                {FAILURE_MODES.slice(0, 6).map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    title={FAILURE_MODE_ACTIONS[m]}
-                    onClick={() => studio.rejectVideoVariant(seg.id, seg.variants[0]?.id ?? "", m)}
-                    className="rounded-full border border-destructive/30 px-2 py-0.5 text-[10px] text-muted-foreground transition-colors hover:border-destructive/60 hover:text-red-300"
-                  >
-                    {m}
-                  </button>
-                ))}
-              </div>
+              {seg.attributedFailure ? (
+                <div className="mt-1.5">
+                  <p className="text-[11px] text-red-300/90">
+                    已归因：{seg.attributedFailure}——{FAILURE_MODE_ACTIONS[seg.attributedFailure]}
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">
+                    改写提示词保存后，「重试失败/待重制」才会纳入本段。
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
+                    选择失败原因后按建议动作重写，再重制——未归因前批量重试保持禁用。
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {FAILURE_MODES.filter(
+                      (m) =>
+                        m !== "口型不同步" || (seg.dialogue && seg.dialogueStrategy !== "mute"),
+                    ).map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        title={FAILURE_MODE_ACTIONS[m]}
+                        onClick={() => studio.attributeFailure(seg.id, m)}
+                        className={cn(
+                          "rounded-full border px-2 py-0.5 text-[10px] text-muted-foreground transition-colors hover:border-destructive/60 hover:text-red-300",
+                          m === "内容审核拒绝" && "border-destructive/40",
+                        )}
+                      >
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           ) : null}
 
@@ -347,9 +399,11 @@ export function CandidateDrawer({
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    {seg.promptStale
-                      ? "提示词已过期——先改写保存"
-                      : "继承 seed 与参数再生成一组做对照；换镜重写请改提示词后保存"}
+                    {seg.promptStale || promptDirty
+                      ? "提示词已修改未保存/已过期——先保存改写"
+                      : seg.billedAttempts + seg.failedAttempts >= 15
+                        ? "单镜预算 15 次封顶——必须换镜重写"
+                        : "继承 seed 与参数再生成一组做对照；换镜重写请改提示词后保存"}
                   </TooltipContent>
                 </Tooltip>
               ) : null}
@@ -375,9 +429,9 @@ export function CandidateDrawer({
                     <div
                       className="relative mb-2 aspect-[3/4] w-full overflow-hidden rounded-md"
                       style={{
-                        backgroundColor: "oklch(0.16 0.02 250)",
+                        backgroundColor: "oklch(0.24 0.03 250)",
                         backgroundImage:
-                          "radial-gradient(60% 50% at 35% 30%, oklch(0.3 0.05 250), transparent 70%), radial-gradient(40% 40% at 75% 75%, oklch(0.22 0.03 220), transparent 75%)",
+                          "radial-gradient(55% 45% at 35% 28%, oklch(0.48 0.07 250), transparent 72%), radial-gradient(45% 38% at 72% 72%, oklch(0.34 0.05 220), transparent 76%), radial-gradient(30% 25% at 50% 55%, oklch(0.4 0.04 260), transparent 80%)",
                       }}
                     >
                       <span className="absolute bottom-2 left-2 rounded bg-black/50 px-1.5 py-0.5 text-[10px] tabular-nums text-white/70">
