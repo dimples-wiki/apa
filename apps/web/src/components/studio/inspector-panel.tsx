@@ -1,6 +1,6 @@
-import { Camera, Clapperboard, KeySquare, Type } from "lucide-react";
+import { Camera, KeySquare, Type } from "lucide-react";
 import type { Shot } from "@dimples/apa-shared";
-import { SHOT_STATUS_LABELS } from "@dimples/apa-shared";
+import { CAMERA_MOVES, SHOT_STATUS_LABELS } from "@dimples/apa-shared";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -11,7 +11,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { CAMERA_MOVES } from "@dimples/apa-shared";
 
 export function InspectorPanel({
   shot,
@@ -22,10 +21,12 @@ export function InspectorPanel({
 }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-      <div className="flex h-10 shrink-0 items-center gap-2 border-b px-3">
-        <Clapperboard className="size-3.5 text-muted-foreground" />
+      <div className="sticky top-0 z-10 flex h-10 shrink-0 items-center gap-2 border-b bg-background px-3">
+        <ClapperIcon />
         <span className="text-[12px] font-medium text-muted-foreground">镜头属性</span>
-        <span className="ml-auto text-[11px] tabular-nums text-muted-foreground">{shot.code}</span>
+        <span className="ml-auto text-[11px] tabular-nums text-muted-foreground">
+          {shot.code}
+        </span>
       </div>
 
       <div className="flex flex-col gap-5 p-4">
@@ -123,8 +124,37 @@ export function InspectorPanel({
                   ? "关键帧已定，可在预览区发起 AI 补全。"
                   : "先定关键帧，再由 AI 补全镜头画面。"}
           </p>
+          {shot.status === "failed" && shot.failureReason ? (
+            <p className="mt-1.5 border-t border-destructive/20 pt-1.5 text-[11px] leading-4 text-red-400">
+              失败原因：{shot.failureReason}
+            </p>
+          ) : null}
+          {shot.scriptSyncStatus === "stale" ? (
+            <p className="mt-1.5 border-t pt-1.5 text-[11px] leading-4 text-amber-500">
+              剧本已改稿，此镜头待同步。
+            </p>
+          ) : null}
         </div>
       </div>
     </div>
+  );
+}
+
+function ClapperIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-3.5 text-muted-foreground"
+    >
+      <path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z" />
+      <path d="m6.2 5.3 3.1 3.9" />
+      <path d="m12.4 3.4 3.1 4" />
+      <path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
+    </svg>
   );
 }

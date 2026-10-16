@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { ArrowUpRight, Plus } from "lucide-react";
+import { Link } from "react-router";
 import type { Project, ProjectStatus } from "@dimples/apa-shared";
 import { PROJECT_STATUS_LABELS } from "@dimples/apa-shared";
 import { assetUrl, cn, coverGrid } from "@/lib/utils";
@@ -40,7 +41,12 @@ function ProjectCard({ project }: { project: Project }) {
   });
 
   return (
-    <Card className="group cursor-pointer gap-0 overflow-hidden py-0 transition-colors hover:border-foreground/25">
+    <Link
+      to={`/projects/${project.id}/studio`}
+      className="block rounded-xl border-input/0 transition-colors focus-visible:outline-none"
+      aria-label={`打开项目「${project.name}」创作工作台`}
+    >
+      <Card className="group h-full gap-0 overflow-hidden py-0 transition-colors hover:border-foreground/25">
       <CardHeader className="relative h-16 overflow-hidden border-b p-4 sm:h-24">
         {project.cover ? (
           <>
@@ -101,7 +107,8 @@ function ProjectCard({ project }: { project: Project }) {
           {updatedAt}
         </span>
       </CardFooter>
-    </Card>
+      </Card>
+    </Link>
   );
 }
 
