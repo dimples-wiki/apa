@@ -1,179 +1,43 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ArrowLeft,
   Clapperboard,
+  Layers,
+  ListChecks,
   PenLine,
-  Plus,
   Redo2,
-  Sparkles,
   Undo2,
 } from "lucide-react";
 import { Link, useParams } from "react-router";
-import { formatDuration, type Shot, type ShotStatus } from "@dimples/apa-shared";
-import { toast } from "sonner";
+import { formatDuration, formatMoney } from "@dimples/apa-shared";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useStudio, type StudioMode } from "@/hooks/use-studio";
 import { EpisodeStrip } from "@/components/studio/episode-strip";
-import { ShotList } from "@/components/studio/shot-list";
-import { PreviewPane } from "@/components/studio/preview-pane";
-import { InspectorPanel } from "@/components/studio/inspector-panel";
-import { Timeline } from "@/components/studio/timeline";
-import { ScriptMode } from "@/components/studio/script-mode";
+import { ShotListTable } from "@/components/studio/shot-list-table";
+import { CandidateDrawer } from "@/components/studio/candidate-drawer";
+import { PreviewView } from "@/components/studio/preview-view";
+import { PlanView } from "@/components/studio/plan-view";
 
-const MODES: { key: StudioMode; label: string }[] = [
-  { key: "storyboard", label: "分镜工作台" },
-  { key: "script", label: "剧本" },
+const MODES: { key: StudioMode; label: string; icon: typeof ListChecks }[] = [
+  { key: "shotlist", label: "制作清单", icon: ListChecks },
+  { key: "preview", label: "拼装预览", icon: Layers },
+  { key: "plan", label: "剧本规划", icon: PenLine },
 ];
 
 export default function ProjectStudioPage() {
   const { id } = useParams<{ id: string }>();
   const project = {
-    id: id ?? "p-002",
-    name: "星际摆渡人",
-    logline: "末日地球最后一位星际摆渡人，驾驶旧飞船护送三千沉睡者前往新家园。",
-    cover: "/covers/p-002.jpg",
-    genre: "科幻",
-    status: "post" as const,
-    progress: 84,
-    members: ["白鹿", "程一苇"],
-    updatedAt: "2026-10-11T14:30:00.000Z",
+    id: id ?? "p-007",
+    name: "雾岛来电",
+    format: "竖屏 AI 短剧 · 12 集",
   };
-
   const studio = useStudio();
-  const {
-    episodes,
-    episode,
-    activeEpIndex,
-    setActiveEpIndex,
-    addEpisode,
-    updateEpisode,
-    activeShot,
-    setActiveShotId,
-    filteredStatus,
-    setFilteredStatus,
-    visibleShots,
-    total,
-    readyCount,
-    canUndo,
-    canRedo,
-    undo,
-    redo,
-    updateShot,
-    addShot,
-  } = studio;
-
-  const [mode, setMode] = useState<StudioMode>("storyboard");
-  const [playing, setPlaying] = useState(false);
-  const [playhead, setPlayhead] = useState(0);
-
-  useEffect(() => {
-    if (!playing) return;
-    const t = setInterval(() => {
-      setPlayhead((p) => {
-        if (p + 0.1 >= total) {
-          setPlaying(false);
-          return total;
-        }
-        return Math.round((p + 0.1) * 10) / 10;
-      });
-    }, 100);
-    return () => clearInterval(t);
-  }, [playing, total]);
-
-  function switchEpisode(i: number) {
-    setActiveEpIndex(i);
-    setPlaying(false);
-    setPlayhead(0);
-  }
-
-  function togglePlay() {
-    if (!playing && playhead >= total) setPlayhead(0);
-    setPlaying((p) => !p);
-  }
-
-  /** 单镜头生成：draft/keyframe/failed → generating；generating → ready（模拟完成） */
-  function generateShot(shot: Shot) {
-    if (shot.status === "generating") {
-      updateShot(shot.id, { status: "ready" });
-    } else {
-      updateShot(shot.id, {
-        status: "generating",
-        failureReason: undefined,
-        attempts: (shot.attempts ?? 0) + 1,
-      });
-    }
-  }
-
-  /** 图例筛选联动：自动选中该状态的首个镜头（筛失败即看失败） */
-  function handleFilter(s: ShotStatus | null) {
-    setFilteredStatus(s);
-    if (s) {
-      const first = episode.shots.find((x) => x.status === s);
-      if (first) setActiveShotId(first.id);
-    }
-  }
-
-  /** AI 补全全集守卫：无大纲或无剧本时禁用（先有故事，再谈画面） */
-  const aiBlocked =
-    !episode.synopsis.trim() || episode.scriptScenes.length === 0 || episode.shots.length === 0;
-
-  function completeEpisode() {
-    const targets = episode.shots.filter(
-      (s) => s.status === "draft" || s.status === "keyframe" || s.status === "failed",
-    );
-    if (targets.length === 0) {
-      toast.info("本集所有镜头均已就绪");
-      return;
-    }
-    for (const s of targets) generateShot(s);
-    toast.success(`已提交 ${targets.length} 个镜头的生成任务（演示）`);
-  }
-
-  function createShotFromScene(sceneId: string, description: string) {
-    addShot({
-      sceneId,
-      description,
-      keyframe: { description },
-      status: "draft",
-      camera: "固定",
-    });
-    setMode("storyboard");
-    setFilteredStatus(null);
-    toast.success("已从场次生成镜头，继续补关键帧");
-  }
-
-  const completion = (
-    <div
-      className="hidden items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] tabular-nums text-muted-foreground md:flex"
-      title={`本集完成度：${readyCount}/${episode.shots.length} 镜就绪`}
-    >
-      <span
-        className={cn(
-          "size-1.5 rounded-full",
-          episode.shots.length === 0 ? "bg-zinc-600" : "bg-emerald-500",
-        )}
-      />
-      {episode.shots.length === 0 ? (
-        <span>空集</span>
-      ) : (
-        <>
-          <span className="text-foreground/80">
-            {readyCount}/{episode.shots.length}
-          </span>
-          镜就绪
-        </>
-      )}
-      <span className="text-muted-foreground/60">· {formatDuration(total)}</span>
-    </div>
-  );
+  const { episode, stats, budget, canUndo, canRedo, undo, redo } = studio;
+  const [mode, setMode] = useState<StudioMode>("shotlist");
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -188,8 +52,11 @@ export default function ProjectStudioPage() {
           <Separator orientation="vertical" className="h-5" />
           <div className="flex min-w-0 items-center gap-2">
             <Clapperboard className="size-4 shrink-0 text-muted-foreground" />
-            <span className="max-w-40 truncate text-[13px] font-medium sm:max-w-none">
+            <span className="max-w-36 truncate text-[13px] font-medium sm:max-w-none">
               {project.name}
+            </span>
+            <span className="hidden rounded-full border px-2 py-0.5 text-[10px] tabular-nums text-muted-foreground md:inline">
+              {episode.aspectRatio} · {project.format}
             </span>
           </div>
 
@@ -207,21 +74,75 @@ export default function ProjectStudioPage() {
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                {m.key === "script" ? <PenLine className="size-3" /> : null}
-                <span className="sm:hidden">{m.key === "script" ? "剧本" : "分镜"}</span>
-                <span className="max-sm:hidden">{m.label}</span>
+                <m.icon className="size-3" />
+                <span className="hidden sm:inline">{m.label}</span>
+                <span className="sm:hidden">{m.label.slice(0, 2)}</span>
               </button>
             ))}
           </div>
 
           <div className="ml-auto flex items-center gap-2">
-            {completion}
-            <div
-              className="hidden items-center gap-1 text-[11px] tabular-nums text-muted-foreground lg:flex"
-              title="演示数据：本月剩余 AI 生成点数"
-            >
-              <Sparkles className="size-3" />
-              1,280 点
+            {/* 管线总览徽章：定稿/成本/选优率 */}
+            <div className="hidden items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] tabular-nums text-muted-foreground lg:flex">
+              <span className="flex items-center gap-1">
+                <span
+                  className={cn(
+                    "size-1.5 rounded-full",
+                    stats.pickedKf === stats.totalKf && stats.totalKf > 0
+                      ? "bg-emerald-500"
+                      : "bg-amber-400",
+                  )}
+                />
+                {stats.pickedKf}/{stats.totalKf} 帧 · {stats.readySeg}/{stats.totalSeg} 段
+              </span>
+              <span className="text-border">|</span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="flex cursor-help items-center gap-1.5">
+                    <span
+                      className={cn(
+                        budget.estimate > budget.cap * 0.8 ? "text-red-400" : "text-foreground/75",
+                      )}
+                    >
+                      {formatMoney(stats.cost)}
+                    </span>
+                    <span className="relative h-1 w-12 overflow-hidden rounded-full bg-muted">
+                      <span
+                        className={cn(
+                          "absolute inset-y-0 left-0 rounded-full",
+                          budget.estimate > budget.cap * 0.8 ? "bg-red-400" : "bg-emerald-500/70",
+                        )}
+                        style={{ width: `${Math.min(100, (budget.spent / (budget.cap || 1)) * 100)}%` }}
+                      />
+                      <span
+                        className="absolute inset-y-0 w-px bg-foreground/60"
+                        style={{ left: `${Math.min(100, (budget.estimate / (budget.cap || 1)) * 100)}%` }}
+                      />
+                    </span>
+                    <span className="text-muted-foreground/60">
+                      / {formatMoney(budget.cap)}
+                    </span>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent className="text-[11px] leading-4">
+                  已花 {formatMoney(budget.spent)}（仅成功计费）· 完成预估{" "}
+                  {formatMoney(budget.estimate)}（待生成段 ×2 重试）· 上限 {formatMoney(budget.cap)}{" "}
+                  （全部段 ×3）· 超上限 80% 转红
+                </TooltipContent>
+              </Tooltip>
+              <span className="text-border">|</span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="cursor-help">
+                    选优 {Math.round(stats.selection.ratio * 100)}%
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent className="text-[11px]">
+                  {stats.selection.picked}/{stats.selection.total} 采纳 · 行业基线 20–27:1 生成:可用
+                </TooltipContent>
+              </Tooltip>
+              <span className="text-border">|</span>
+              <span>{formatDuration(stats.duration)}</span>
             </div>
             <Separator orientation="vertical" className="hidden h-5 sm:block" />
             <div className="hidden items-center sm:flex">
@@ -248,176 +169,30 @@ export default function ProjectStudioPage() {
                 <Redo2 className="size-3.5" />
               </Button>
             </div>
-            {mode === "storyboard" ? (
-              <Button
-                variant="outline"
-                size="sm"
-                className="hidden gap-1.5 sm:inline-flex"
-                onClick={() => addShot()}
-              >
-                <Plus className="size-3.5" />
-                镜头
-              </Button>
-            ) : null}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="inline-flex">
-                  <Button
-                    size="sm"
-                    aria-label="AI 补全全集"
-                    className={cn("gap-1.5", aiBlocked && "opacity-45 saturate-0")}
-                    onClick={completeEpisode}
-                    disabled={aiBlocked}
-                  >
-                    <Sparkles className="size-3.5" />
-                    <span className="max-sm:hidden">AI 补全全集</span>
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              {aiBlocked ? (
-                <TooltipContent>
-                  先在「剧本」模式补全本集大纲与场次，再让 AI 按关键帧补全画面
-                </TooltipContent>
-              ) : null}
-            </Tooltip>
           </div>
         </header>
 
         {/* ── 横向集条 ── */}
         <EpisodeStrip
-          episodes={episodes}
-          activeIndex={activeEpIndex}
-          onSelect={switchEpisode}
-          onAdd={addEpisode}
+          episodes={studio.episodes}
+          activeIndex={studio.activeEpIndex}
+          onSelect={(i) => {
+            studio.setActiveEpIndex(i);
+            studio.setSelectedIds(new Set());
+          }}
+          onAdd={studio.addEpisode}
         />
 
         {/* ── 主体 ── */}
-        {mode === "script" ? (
-          <ScriptMode
-            episode={episode}
-            onEpisodeChange={updateEpisode}
-            onCreateShotFromScene={createShotFromScene}
-          />
+        {mode === "shotlist" ? (
+          <ShotListTable studio={studio} onOpenCandidates={() => setDrawerOpen(true)} />
+        ) : mode === "preview" ? (
+          <PreviewView studio={studio} onOpenCandidates={() => setDrawerOpen(true)} />
         ) : (
-          <div className="flex min-h-0 flex-1">
-            <aside className="hidden w-72 shrink-0 flex-col border-r lg:flex">
-              <div className="flex h-10 shrink-0 items-center justify-between border-b px-3">
-                <span className="text-[12px] text-muted-foreground">
-                  镜头{" "}
-                  <span className="font-medium tabular-nums text-foreground">
-                    {filteredStatus ? `${visibleShots.length}/${episode.shots.length}` : episode.shots.length}
-                  </span>
-                  <span className="ml-2">成片 {readyCount}</span>
-                </span>
-                <span className="text-[12px] tabular-nums text-muted-foreground">
-                  {formatDuration(total)}
-                </span>
-              </div>
-              <ShotList
-                shots={visibleShots}
-                activeShotId={activeShot?.id ?? null}
-                onSelect={setActiveShotId}
-                onAdd={() => addShot()}
-                emptyHint={
-                  filteredStatus
-                    ? "没有符合筛选的镜头，点击时间线图例清除筛选"
-                    : "本集还没有镜头，从顶部添加或切到「剧本」从场次生成"
-                }
-              />
-            </aside>
-
-            <main className="flex min-w-0 flex-1 flex-col">
-              {/* 移动端镜头横滑条 */}
-              <div className="flex gap-1.5 overflow-x-auto border-b p-2 [scrollbar-width:none] lg:hidden [&::-webkit-scrollbar]:hidden">
-                {episode.shots.map((s) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => setActiveShotId(s.id)}
-                    className={cn(
-                      "flex h-9 shrink-0 items-center gap-1.5 rounded-md border px-2.5 text-[12px] tabular-nums",
-                      s.id === activeShot?.id
-                        ? "border-foreground/45 bg-foreground/[0.08] font-medium text-foreground"
-                        : "text-muted-foreground hover:border-foreground/30",
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "size-1.5 rounded-full",
-                        s.status === "ready" && "bg-emerald-400",
-                        s.status === "generating" && "bg-[#0070f3]",
-                        s.status === "keyframe" && "bg-amber-400",
-                        s.status === "failed" && "bg-destructive",
-                        s.status === "draft" && "bg-zinc-500",
-                      )}
-                    />
-                    {s.code}
-                    <span className="text-muted-foreground/60">{s.duration}s</span>
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => addShot()}
-                  className="flex h-9 shrink-0 items-center rounded-md border border-dashed px-2.5 text-[12px] text-muted-foreground"
-                >
-                  <Plus className="size-3" />
-                </button>
-              </div>
-              <PreviewPane
-                shot={activeShot}
-                episodeMeta={{
-                  number: episode.number,
-                  title: episode.title,
-                  total: episode.shots.length,
-                  index: episode.shots.findIndex((s) => s.id === activeShot?.id) + 1,
-                }}
-                onGenerate={() => activeShot && generateShot(activeShot)}
-              />
-              <Timeline
-                shots={episode.shots}
-                activeShotId={activeShot?.id ?? null}
-                onSelect={setActiveShotId}
-                total={total}
-                statusFilter={filteredStatus}
-                onFilterChange={handleFilter}
-                playhead={playhead}
-                playing={playing}
-                onTogglePlay={togglePlay}
-              />
-            </main>
-
-            <aside className="hidden w-80 shrink-0 flex-col border-l lg:flex">
-              {activeShot ? (
-                <InspectorPanel
-                  shot={activeShot}
-                  onChange={(patch) => updateShot(activeShot.id, patch)}
-                />
-              ) : (
-                <div className="flex flex-1 items-center justify-center px-6">
-                  <div className="flex max-w-52 flex-col items-center gap-2.5 rounded-lg border border-dashed p-5 text-center text-muted-foreground">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="size-6 opacity-60"
-                    >
-                      <path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3Z" />
-                      <path d="m6.2 5.3 3.1 3.9" />
-                      <path d="m12.4 3.4 3.1 4" />
-                      <path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
-                    </svg>
-                    <p className="text-[12px] leading-5">
-                      选中一个镜头后，在这里编辑关键帧与导演意图
-                    </p>
-                  </div>
-                </div>
-              )}
-            </aside>
-          </div>
+          <PlanView studio={studio} />
         )}
+
+        <CandidateDrawer studio={studio} open={drawerOpen} onOpenChange={setDrawerOpen} />
       </div>
     </TooltipProvider>
   );

@@ -1,9 +1,18 @@
 import { Plus } from "lucide-react";
 import type { Episode } from "@dimples/apa-shared";
-import { episodeDuration, formatDuration } from "@dimples/apa-shared";
+import { episodeCost, episodeDuration, formatDuration, formatMoney } from "@dimples/apa-shared";
 import { cn } from "@/lib/utils";
 
-/** 横向集条：集卡（EP+标题+四色迷你条）+ 尾卡新集 + 右端共 N 集 */
+const segBarColors: { key: string; dot: string }[] = [
+  { key: "ready", dot: "bg-emerald-400" },
+  { key: "generating", dot: "bg-[#0070f3]" },
+  { key: "stale", dot: "bg-amber-400" },
+  { key: "planned", dot: "bg-violet-400" },
+  { key: "draft", dot: "bg-zinc-600" },
+  { key: "failed", dot: "bg-red-500" },
+];
+
+/** 横向集条：集卡（EP+标题+段状态迷你条+成本）+ 尾卡新增 + 共 N 集 */
 export function EpisodeStrip({
   episodes,
   activeIndex,
@@ -15,19 +24,14 @@ export function EpisodeStrip({
   onSelect: (i: number) => void;
   onAdd: () => void;
 }) {
-  const statusColors = [
-    { key: "ready", dot: "bg-emerald-400" },
-    { key: "generating", dot: "bg-[#0070f3]" },
-    { key: "keyframe", dot: "bg-amber-400" },
-    { key: "draft", dot: "bg-zinc-500" },
-    { key: "failed", dot: "bg-red-500" },
-  ];
-
   function miniBar(ep: Episode): string[] {
     const total = episodeDuration(ep) || 1;
-    const buckets: Record<string, number> = {};
-    for (const s of ep.shots) buckets[s.status] = (buckets[s.status] ?? 0) + s.duration;
-    return statusColors.map(({ key }) => `${((buckets[key] ?? 0) / total) * 100}%`);
+    return segBarColors.map(({ key }) => {
+      const v = ep.segments
+        .filter((s) => s.status === key)
+        .reduce((a, s) => a + s.duration, 0);
+      return `${(v / total) * 100}%`;
+    });
   }
 
   return (
@@ -39,6 +43,8 @@ export function EpisodeStrip({
       {episodes.map((ep, i) => {
         const bars = miniBar(ep);
         const active = i === activeIndex;
+        const dur = episodeDuration(ep);
+        const cost = episodeCost(ep);
         return (
           <button
             key={ep.id}
@@ -57,19 +63,27 @@ export function EpisodeStrip({
               </span>
               <span className="truncate text-[12px] font-medium">{ep.title}</span>
               <span className="ml-auto text-[10px] tabular-nums text-muted-foreground">
-                {formatDuration(episodeDuration(ep))}
+                {dur > 0 ? formatDuration(dur) : "—"}
               </span>
             </div>
-            <div className="flex h-1 gap-px overflow-hidden rounded-full">
-              {bars.map((w, j) => (
-                <span
-                  key={j}
-                  className={cn("h-full", statusColors[j].dot)}
-                  style={{ width: w }}
-                />
-              ))}
-              {episodeDuration(ep) === 0 ? (
-                <span className="h-full w-full rounded-full bg-muted" />
+            <div className="flex items-center gap-1.5">
+              <div className="flex h-1 min-w-0 flex-1 gap-px overflow-hidden rounded-full">
+                {dur === 0 ? (
+                  <span className="h-full w-full rounded-full bg-muted" />
+                ) : (
+                  bars.map((w, j) => (
+                    <span
+                      key={j}
+                      className={cn("h-full", segBarColors[j].dot)}
+                      style={{ width: w }}
+                    />
+                  ))
+                )}
+              </div>
+              {cost > 0 ? (
+                <span className="text-[9px] tabular-nums text-muted-foreground/70">
+                  {formatMoney(cost)}
+                </span>
               ) : null}
             </div>
           </button>
