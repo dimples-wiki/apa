@@ -7,9 +7,10 @@ import { Hono } from "hono";
 import { type Actor, type Costume, type Project, type Scene } from "@dimples/apa-shared";
 import { actors, costumes, projects, scenes } from "./data.ts";
 
-const bundledPublic = fileURLToPath(new URL("./public", import.meta.url));
+// monorepo 开发态优先用 apps/web/dist（最新构建）；npm 发布包内无该目录时回落打包快照
 const devWebDist = fileURLToPath(new URL("../../web/dist", import.meta.url));
-const webDist = existsSync(bundledPublic) ? bundledPublic : devWebDist;
+const bundledPublic = fileURLToPath(new URL("./public", import.meta.url));
+const webDist = existsSync(devWebDist) ? devWebDist : bundledPublic;
 
 export function startServer(opts: { port: number; hostname: string }) {
   const app = new Hono();
@@ -95,11 +96,15 @@ export function startServer(opts: { port: number; hostname: string }) {
     return c.json(costume, 201);
   });
 
-  // 静态资源长缓存（文件更新随构建产物版本变化）
+  // 缓存策略：带 hash 的 assets 长缓存；index.html 不缓存（保证发布后立即生效）
   app.use("*", async (c, next) => {
     await next();
     if (!c.req.path.startsWith("/api")) {
-      c.header("Cache-Control", "public, max-age=604800");
+      if (c.req.path === "/" || c.req.path.endsWith(".html")) {
+        c.header("Cache-Control", "no-cache");
+      } else {
+        c.header("Cache-Control", "public, max-age=604800");
+      }
     }
   });
 
