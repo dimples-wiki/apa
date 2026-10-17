@@ -179,3 +179,12 @@ interface Episode {
 1. **批 1 数据模型**：shared 重写（VideoModelSpec/Beat/ReferenceAsset/Keyframe/Variant/FailureMode/Segment/Episode），mock 换竖屏短剧真实结构示例（含候选池、失败归因、成本数据）；
 2. **批 2 管线 UI**：shot list 主视图 + 规划视图（拆集/节拍/关键帧规划）+ 候选池选优（j/k）+ 批量生成/重试 + 拼装预览时间线（块=Segment、插入 N 帧、stale 传播）+ 9:16 监视器 + 成本条；
 3. **批 3 铁证**：Seedance API 接入（server 代理，billed/failed 分账）+ 成本/选优率看板 + 盲评维度更新 + 1 集端到端成片。
+
+## 六、批 2.5 增补（2026-10-17，吸收 Lazy Studio 参照物，见 memory lazy-studio-reference）
+
+1. **音频多轨模型**：Segment 挂 AudioCue[]（voice 台词/sfx 音效/ambience 拟音/music 配乐，各带 label/offset/时长/供应商/提示词/成本），拼装预览时间线按轨渲染——成片六要素的工程化。
+2. **集版本档案**：Episode.versions[]（v1/v2…，四段式：依据→问题→改法→量化效果，量化可接 VLM 评审自动生成），重生成是迭代资产不是失败记录。
+3. **花费按供应商分列**：账单矩阵 = 供应商 × 元素类型（火山方舟视频/MiniMax 音效/ElevenLabs 配音…），进预算条与质检页。
+4. **质检视图**：validateEpisode 不变式检查报告（档位合法/首帧定稿/失败归因/待重写清零/备案/钩子/预算/目标时长），fail/warn 可跳转。
+5. **素材库视图**：一致性资产（角色/场景/服装/道具/风格）独立管理页，含权重与被引用数。
+6. **打标记审片流**：播放器打标记（M 键）+时间线旗标+标记列表；播放快捷键体系（空格/逐镜/秒帧）。

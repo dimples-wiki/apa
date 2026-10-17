@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   ArrowLeft,
   Clapperboard,
+  FileCheck,
   Layers,
   ListChecks,
   PenLine,
@@ -20,11 +21,13 @@ import { ShotListTable } from "@/components/studio/shot-list-table";
 import { CandidateDrawer } from "@/components/studio/candidate-drawer";
 import { PreviewView } from "@/components/studio/preview-view";
 import { PlanView } from "@/components/studio/plan-view";
+import { InsightView } from "@/components/studio/insight-view";
 
 const MODES: { key: StudioMode; label: string; icon: typeof ListChecks }[] = [
   { key: "shotlist", label: "制作清单", icon: ListChecks },
   { key: "preview", label: "拼装预览", icon: Layers },
   { key: "plan", label: "剧本规划", icon: PenLine },
+  { key: "insight", label: "质检素材", icon: FileCheck },
 ];
 
 export default function ProjectStudioPage() {
@@ -187,6 +190,8 @@ export default function ProjectStudioPage() {
           <ShotListTable studio={studio} onOpenCandidates={() => setDrawerOpen(true)} />
         ) : mode === "preview" ? (
           <PreviewView studio={studio} onOpenCandidates={() => setDrawerOpen(true)} />
+        ) : mode === "insight" ? (
+          <InsightView studio={studio} />
         ) : (
           <PlanView studio={studio} />
         )}

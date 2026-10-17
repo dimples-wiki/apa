@@ -1,12 +1,23 @@
 import { useEffect, useState } from "react";
-import { Loader2, Plus, Play, RefreshCcw, Sparkles, TriangleAlert, Wand2 } from "lucide-react";
 import {
+  Flag,
+  Loader2,
+  Plus,
+  Play,
+  RefreshCcw,
+  Sparkles,
+  TriangleAlert,
+  Wand2,
+} from "lucide-react";
+import {
+  AUDIO_TRACK_LABELS,
   DIALOGUE_STRATEGY_LABELS,
   SEGMENT_STATUS_LABELS,
   estimateClipCost,
   formatDuration,
   formatMoney,
   getModel,
+  type AudioTrackKind,
   type Keyframe,
   type Segment,
 } from "@dimples/apa-shared";
@@ -82,6 +93,9 @@ export function PreviewView({
   const [playhead, setPlayhead] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [insertAt, setInsertAt] = useState<string | null>(null);
+  const [markers, setMarkers] = useState<{ atSec: number; note: string }[]>([]);
+
+  const audioTracks: AudioTrackKind[] = ["voice", "sfx", "ambience", "music"];
 
   const activeSeg =
     episode.segments.find((s) => s.id === studio.activeSegmentId) ??
@@ -110,6 +124,28 @@ export function PreviewView({
     if (!playing && playhead >= total) setPlayhead(0);
     setPlaying((p) => !p);
   }
+
+  /** 审片快捷键：空格播放/暂停 · M 打标记 */
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const el = document.activeElement as HTMLElement | null;
+      if (el && (el.tagName === "TEXTAREA" || el.tagName === "INPUT")) return;
+      if (e.code === "Space") {
+        e.preventDefault();
+        togglePlay();
+      } else if (e.key === "m" || e.key === "M") {
+        setMarkers((prev) => [
+          ...prev,
+          {
+            atSec: Math.round(playhead * 10) / 10,
+            note: `看片标记 ${prev.length + 1}`,
+          },
+        ]);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
 
   const canGenerate =
     activeSeg &&
@@ -238,6 +274,24 @@ export function PreviewView({
                 钩子 0–{episode.hookAtSec}s
               </span>
             ) : null}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setMarkers((prev) => [
+                      ...prev,
+                      { atSec: Math.round(playhead * 10) / 10, note: `看片标记 ${prev.length + 1}` },
+                    ])
+                  }
+                  className="hidden shrink-0 items-center gap-1 rounded px-1 transition-colors hover:text-foreground md:flex"
+                >
+                  <Flag className="size-3" />
+                  打标记 (M)
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="text-[11px]">在当前播放头位置落一个审片标记</TooltipContent>
+            </Tooltip>
             <span className="ml-auto shrink-0 tabular-nums">
               总时长 {formatDuration(total)}
               {episode.targetDurationSec
@@ -361,22 +415,74 @@ export function PreviewView({
                 ) : null}
               </div>
 
-              {/* 对白轨 */}
-              {episode.segments.some((s) => s.dialogue) ? (
-                <div className="relative z-10 flex h-5 items-stretch gap-px pb-2">
-                  {episode.segments.map((seg) => (
-                    <div
-                      key={seg.id}
-                      style={{ flexGrow: seg.duration, flexBasis: `${seg.duration * 16}px` }}
-                      className="min-w-20 overflow-hidden rounded-sm border border-white/5 bg-white/[0.03] px-1"
-                      title={seg.dialogue ? `${DIALOGUE_STRATEGY_LABELS[seg.dialogueStrategy ?? "tts-post"]}：「${seg.dialogue}」` : "无对白"}
-                    >
-                      {seg.dialogue ? (
-                        <p className="truncate pt-0.5 text-[9px] leading-4 text-white/45">
-                          「{seg.dialogue}」
-                        </p>
-                      ) : null}
-                    </div>
+              {/* 音频多轨（台词/音效/拟音/配乐——成片六要素的工程化）；轨标悬浮，基准与段块对齐 */}
+              {audioTracks.map((kind) => {
+                const cues = episode.segments.flatMap((s) =>
+                  (s.cues ?? []).filter((c) => c.kind === kind).map((c) => ({ seg: s, cue: c })),
+                );
+                if (cues.length === 0) return null;
+                return (
+                  <div
+                    key={kind}
+                    className="relative z-10 h-5 border-t border-white/[0.04]"
+                    title={`${AUDIO_TRACK_LABELS[kind]} · ${cues.length} 条`}
+                  >
+                    <span className="pointer-events-none absolute left-3 top-0.5 z-10 rounded-sm bg-zinc-950/80 px-1 text-[9px] leading-3.5 text-muted-foreground/50">
+                      {AUDIO_TRACK_LABELS[kind]}
+                      <span className="ml-1 tabular-nums">{cues.length}</span>
+                    </span>
+                    {cues.map(({ seg, cue }) => {
+                      const segStart = episode.segments
+                        .slice(0, episode.segments.indexOf(seg))
+                        .reduce((a, s) => a + s.duration, 0);
+                      const leftPct = total > 0 ? (segStart + (cue.offsetSec ?? 0)) / total : 0;
+                      const widthPct = total > 0 ? (cue.durationSec ?? 1) / total : 0;
+                      return (
+                        <Tooltip key={cue.id}>
+                          <TooltipTrigger asChild>
+                            <div
+                              className="absolute top-0.5 h-4 overflow-hidden rounded-sm border border-emerald-500/25 bg-emerald-500/10 px-1"
+                              style={{
+                                left: `calc(12px + (100% - 24px) * ${leftPct})`,
+                                width: `calc((100% - 24px) * ${Math.max(widthPct, 0.03)})`,
+                              }}
+                              title={`${cue.label}${cue.provider ? ` · ${cue.provider}` : ""}${cue.cost ? ` · ¥${cue.cost.toFixed(2)}` : ""}`}
+                            >
+                              <p className="truncate pt-0.5 text-[9px] leading-3.5 text-emerald-200/70">
+                                {cue.label}
+                              </p>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent className="text-[11px]">
+                            {AUDIO_TRACK_LABELS[cue.kind]} · {cue.label}
+                            {cue.provider ? ` · ${cue.provider}` : ""}
+                            {cue.prompt ? ` · ${cue.prompt}` : ""}
+                          </TooltipContent>
+                        </Tooltip>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+              <div className="h-2" />
+
+              {/* 审片标记旗 */}
+              {markers.length > 0 ? (
+                <div className="relative z-10 h-3">
+                  {markers.map((m, i) => (
+                    <Tooltip key={i}>
+                      <TooltipTrigger asChild>
+                        <span
+                          className="absolute top-0 size-0 border-x-4 border-t-[6px] border-x-transparent border-t-amber-400"
+                          style={{
+                            left: `calc(12px + (100% - 24px) * ${total > 0 ? m.atSec / total : 0})`,
+                          }}
+                        />
+                      </TooltipTrigger>
+                      <TooltipContent className="text-[11px]">
+                        {m.note} · {formatDuration(m.atSec)}
+                      </TooltipContent>
+                    </Tooltip>
                   ))}
                 </div>
               ) : null}

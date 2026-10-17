@@ -151,6 +151,10 @@ export interface ReferenceAsset {
   name: string;
   type: ReferenceType;
   weight?: number;
+  /** 资产描述（素材库展示） */
+  description?: string;
+  /** 被多少帧/段引用（素材库热度） */
+  usageCount?: number;
 }
 
 /* ───────────────────────── 候选变体（可复现、可归因） ───────────────────────── */
@@ -258,7 +262,142 @@ export interface Segment {
   cost?: number;
   variants: VideoVariant[];
   pickedVariantId?: string;
+  /** 段内音频元素（台词/音效/拟音/配乐） */
+  cues?: AudioCue[];
   status: SegmentStatus;
+}
+
+/* ───────────────────────── 音频元素（成片六要素的轨） ───────────────────────── */
+
+export type AudioTrackKind = "voice" | "sfx" | "ambience" | "music";
+
+export const AUDIO_TRACK_LABELS: Record<AudioTrackKind, string> = {
+  voice: "台词配音",
+  sfx: "音效",
+  ambience: "拟音",
+  music: "配乐",
+};
+
+/** 段内音频元素：一个真实生产里的 cue */
+export interface AudioCue {
+  id: string;
+  kind: AudioTrackKind;
+  /** 内容标签（如"雨声敲窗""古琴重音"） */
+  label: string;
+  /** 段内偏移（秒） */
+  offsetSec?: number;
+  /** 自身时长（秒） */
+  durationSec?: number;
+  /** 供应商（MiniMax / ElevenLabs / 火山方舟…） */
+  provider?: string;
+  /** 生成提示词 */
+  prompt?: string;
+  cost?: number;
+}
+
+/* ───────────────────────── 集版本档案（重生成是迭代资产） ───────────────────────── */
+
+export interface EpisodeVersion {
+  id: string;
+  /** "v1 初剪" / "v2 自改" */
+  label: string;
+  createdAt: string;
+  /** 依据（为什么有这一版） */
+  basis: string[];
+  /** 问题（审片发现了什么） */
+  problems: string[];
+  /** 改法（怎么改的） */
+  changes: string[];
+  /** 量化效果（改完后的硬指标） */
+  metrics: string[];
+  /** 该版本按供应商的花费（元） */
+  costByProvider?: Record<string, number>;
+  isCurrent?: boolean;
+}
+
+/* ───────────────────────── 质检（管线不变式校验） ───────────────────────── */
+
+export type CheckStatus = "pass" | "warn" | "fail";
+
+export interface ValidationCheck {
+  id: string;
+  label: string;
+  status: CheckStatus;
+  detail: string;
+}
+
+/** 管线不变式校验：进真实 API 前的放行检查 */
+export function validateEpisode(ep: Episode, budget?: { estimate: number; cap: number }): ValidationCheck[] {
+  const checks: ValidationCheck[] = [];
+  const badDurations = ep.segments.filter(
+    (s) => !getModel(s.modelId).durations.includes(s.duration),
+  );
+  checks.push({
+    id: "durations",
+    label: "段时长贴合模型档位",
+    status: badDurations.length === 0 ? "pass" : "fail",
+    detail:
+      badDurations.length === 0
+        ? `全部 ${ep.segments.length} 段合法`
+        : `非法段：${badDurations.map((s) => s.code).join("、")}`,
+  });
+  const picked = ep.keyframes.filter((k) => k.status === "picked").length;
+  checks.push({
+    id: "keyframes",
+    label: "首帧全部定稿（先静后动）",
+    status: picked === ep.keyframes.length && ep.keyframes.length > 0 ? "pass" : "warn",
+    detail: `${picked}/${ep.keyframes.length} 已定稿`,
+  });
+  const unattributed = ep.segments.filter((s) => s.status === "failed" && !s.attributedFailure);
+  checks.push({
+    id: "attribution",
+    label: "失败段全部归因",
+    status: unattributed.length === 0 ? "pass" : "fail",
+    detail:
+      unattributed.length === 0
+        ? "无未归因失败段"
+        : `待归因：${unattributed.map((s) => s.code).join("、")}`,
+  });
+  const stale = ep.segments.filter((s) => s.promptStale);
+  checks.push({
+    id: "prompts",
+    label: "待重写提示词清零",
+    status: stale.length === 0 ? "pass" : "warn",
+    detail:
+      stale.length === 0 ? "无过期提示词" : `待重写：${stale.map((s) => s.code).join("、")}`,
+  });
+  checks.push({
+    id: "filing",
+    label: "备案号（合规）",
+    status: ep.filingNo ? "pass" : "fail",
+    detail: ep.filingNo ?? "未填写——付费短剧上线前必须过备案",
+  });
+  checks.push({
+    id: "hook",
+    label: "前 3 秒钩子位",
+    status: ep.hookAtSec ? "pass" : "warn",
+    detail: ep.hookAtSec ? `钩子位已标注（0–${ep.hookAtSec}s）` : "未标注钩子位",
+  });
+  if (budget) {
+    const ratio = budget.cap > 0 ? budget.estimate / budget.cap : 0;
+    checks.push({
+      id: "budget",
+      label: "预算（预估/上限）",
+      status: ratio > 1 ? "fail" : ratio > 0.8 ? "warn" : "pass",
+      detail: `预估 ${budget.estimate.toFixed(2)} / 上限 ${budget.cap.toFixed(2)}（${Math.round(ratio * 100)}%）`,
+    });
+  }
+  if (ep.targetDurationSec) {
+    const dur = episodeDuration(ep);
+    const gap = Math.abs(dur - ep.targetDurationSec) / ep.targetDurationSec;
+    checks.push({
+      id: "duration",
+      label: "目标时长差距 ≤20%",
+      status: gap <= 0.2 ? "pass" : "warn",
+      detail: `规划 ${formatDuration(dur)} / 目标 ${formatDuration(ep.targetDurationSec)}`,
+    });
+  }
+  return checks;
 }
 
 /* ───────────────────────── 节拍（剧本 → 关键帧的传导枢纽） ───────────────────────── */
@@ -305,6 +444,8 @@ export interface Episode {
   /** 链式：keyframes.length = segments.length + 1 */
   keyframes: Keyframe[];
   segments: Segment[];
+  /** 整集版本档案（依据→问题→改法→量化效果） */
+  versions?: EpisodeVersion[];
 }
 
 /* ───────────────────────── 聚合计算 ───────────────────────── */
@@ -544,6 +685,10 @@ export const mockEpisodes: Episode[] = [
         pickedVariantId: "vv-001a",
         dialogueStrategy: "mute",
         status: "ready",
+        cues: [
+          { id: "cue-001", kind: "ambience", label: "雨声敲窗", offsetSec: 0, durationSec: 5, provider: "MiniMax", prompt: "持续细密的秋雨打在铁皮窗沿，远处闷雷", cost: 0.6 },
+          { id: "cue-002", kind: "music", label: "低频悬念铺垫", offsetSec: 1, durationSec: 4, provider: "Suno", prompt: "低频弦乐渐入，不安，60bpm", cost: 0.5 },
+        ],
       },
       {
         id: "seg-002",
@@ -573,6 +718,11 @@ export const mockEpisodes: Episode[] = [
           },
         ],
         pickedVariantId: undefined,
+        cues: [
+          { id: "cue-003", kind: "voice", label: "「快……离开岛。」", offsetSec: 4, durationSec: 2.5, provider: "ElevenLabs", prompt: "年轻女声，气声，极度压抑的恐惧", cost: 1.2 },
+          { id: "cue-004", kind: "sfx", label: "电话忙音骤停", offsetSec: 0, durationSec: 1, provider: "MiniMax", cost: 0.3 },
+          { id: "cue-005", kind: "music", label: "弦乐骤紧", offsetSec: 5, durationSec: 5, provider: "Suno", cost: 0.5 },
+        ],
         status: "stale",
       },
       {
@@ -630,7 +780,49 @@ export const mockEpisodes: Episode[] = [
         cost: 0,
         variants: [],
         pickedVariantId: undefined,
+        cues: [
+          { id: "cue-006", kind: "voice", label: "音画同生：来电人台词（含口型）", offsetSec: 8, durationSec: 5, provider: "火山方舟 Seedance 2.5", cost: 0 },
+        ],
         status: "draft",
+      },
+    ],
+    versions: [
+      {
+        id: "epv-001",
+        label: "v1 初剪",
+        createdAt: "2026-10-16T20:00:00.000Z",
+        basis: [
+          "导演看片记录：前 3 秒钩子成立，但 4–9 秒信息密度塌陷",
+          "审片会意见：台词与画面的恐惧递进不同步",
+        ],
+        problems: [
+          "开场雨声铺底太满，座机铃声没有破口",
+          "KF-02 表情靠文字描述，成片面部微表情僵硬",
+          "第二拍情绪转折晚 1.8 秒，观众流失点",
+        ],
+        changes: [
+          "雨声音量 -6dB，前 3 秒只留铃声与呼吸声",
+          "KF-02 重挂林晚三视图（权重 0.9），重写生图提示词强调瞳孔微光",
+          "SEG-02 剪掉 1.8 秒空镜，弦乐骤紧提前",
+        ],
+        metrics: [
+          "重生成 11 次定稿（预算 15 内）",
+          "前 3 秒信息密度评分 6.2 → 8.7（VLM 盲评）",
+          "台词口型同步率 0 帧偏移",
+          "该版花费：火山方舟 ¥25.46 · MiniMax ¥1.7 · ElevenLabs ¥1.2",
+        ],
+        costByProvider: { 火山方舟: 25.46, MiniMax: 1.7, ElevenLabs: 1.2, Suno: 1.0 },
+      },
+      {
+        id: "epv-002",
+        label: "v2 悬念强化",
+        createdAt: "2026-10-17T03:00:00.000Z",
+        basis: ["v1 定稿后导演复看：结尾来电屏反转不够狠"],
+        problems: ["SEG-05 结尾镜头太长，反转延迟 4 秒"],
+        changes: ["拆 15s 段为 10s+5s，反转帧提前", "KF-06 增加电流噪点质感与身后第二身影"],
+        metrics: ["待生成——v2 变更对齐后 2 段置待重制", "预计增费 ¥7.3（档位吸附 5s×2）"],
+        costByProvider: {},
+        isCurrent: true,
       },
     ],
   },
@@ -638,12 +830,12 @@ export const mockEpisodes: Episode[] = [
 
 /** 参考资产库（一致性资产先行） */
 export const mockReferenceAssets: ReferenceAsset[] = [
-  { assetId: "ch-linwan", name: "林晚", type: "character" },
-  { assetId: "sc-station", name: "气象站值班室", type: "scene" },
-  { assetId: "sc-island", name: "雾岛全貌", type: "scene" },
-  { assetId: "pr-phone", name: "老式座机", type: "prop" },
-  { assetId: "pr-records", name: "通话记录单", type: "prop" },
-  { assetId: "sty-fogisland", name: "雾岛冷调", type: "style" },
+  { assetId: "ch-linwan", name: "林晚", type: "character", description: "26 岁守岛接线员，短发，冷白皮，棉工装", usageCount: 5 },
+  { assetId: "sc-station", name: "气象站值班室", type: "scene", description: "老式木质值班室，暖黄台灯+冷蓝仪器光", usageCount: 2 },
+  { assetId: "sc-island", name: "雾岛全貌", type: "scene", description: "孤岛气象站，探照灯，台风夜", usageCount: 1 },
+  { assetId: "pr-phone", name: "老式座机", type: "prop", description: "1980 年代拨盘座机，米白色", usageCount: 2 },
+  { assetId: "pr-records", name: "通话记录单", type: "prop", description: "泛黄纸质记录单，红笔圈注", usageCount: 1 },
+  { assetId: "sty-fogisland", name: "雾岛冷调", type: "style", description: "全片风格锚：青灰冷调+胶片颗粒+低照度", usageCount: 6 },
 ];
 
 /** mock 项目（shot list 顶栏信息） */

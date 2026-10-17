@@ -14,7 +14,7 @@ import {
   type FailureMode,
 } from "@dimples/apa-shared";
 
-export type StudioMode = "shotlist" | "preview" | "plan";
+export type StudioMode = "shotlist" | "preview" | "plan" | "insight";
 
 const clone = (eps: Episode[]): Episode[] => structuredClone(eps);
 
