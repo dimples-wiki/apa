@@ -148,13 +148,13 @@ export const OPS: OpDef[] = [
   {
     name: "keyframe.generate",
     description:
-      "生成关键帧静帧（provider 模拟）。delayMs 传给 server 调度异步完成；不传则同步完成注入候选",
-    args: { kfId: "string", delayMs: "number" },
+      "生成关键帧静帧。hold=true 置 generating 后等待 provider 回调（队列用）；delayMs 由 server 调度异步完成；都不传则同步完成注入候选",
+    args: { kfId: "string", delayMs: "number", hold: "boolean" },
     fn: (state, args) => {
       const { k } = kf(state, String(args.kfId));
       if (k.status === "generating" || k.status === "picked") return;
       k.status = "generating";
-      if (!args.delayMs) completeKeyframe(state, String(args.kfId));
+      if (!args.delayMs && !args.hold) completeKeyframe(state, String(args.kfId));
     },
   },
   {
@@ -229,8 +229,8 @@ export const OPS: OpDef[] = [
   {
     name: "segment.generate",
     description:
-      "图生视频（两阶段闸门：首帧已定稿+提示词未过期+预算 15 次内）。delayMs 同 keyframe.generate",
-    args: { segId: "string", delayMs: "number" },
+      "图生视频（两阶段闸门：首帧已定稿+提示词未过期+预算 15 次内）。hold=true 队列模式等 provider 回调；delayMs 由 server 调度异步完成；都不传则同步完成",
+    args: { segId: "string", delayMs: "number", hold: "boolean" },
     fn: (state, args) => {
       const { s } = seg(state, String(args.segId));
       if (s.status === "generating" || s.status === "ready") return;
@@ -240,7 +240,7 @@ export const OPS: OpDef[] = [
       const k = state.episodes.flatMap((e) => e.keyframes).find((x) => x.id === s.fromKeyframeId);
       if (!k || k.status !== "picked") throw new Error(`首帧未定稿——先静后动`);
       s.status = "generating";
-      if (!args.delayMs) completeSegment(state, String(args.segId));
+      if (!args.delayMs && !args.hold) completeSegment(state, String(args.segId));
     },
   },
   {

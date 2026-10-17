@@ -4,6 +4,7 @@ import { Command } from "commander";
 import { APP_VERSION } from "@dimples/apa-shared";
 import { startServer } from "./server.ts";
 import { loadState, mutate, scheduleCompletion, storePathOf } from "./store.ts";
+import { enqueue, listJobs } from "./queue.ts";
 
 const program = new Command();
 
@@ -163,6 +164,43 @@ batch
   .command("retry")
   .argument("[episodeId]")
   .action((episodeId) => run("batch.retryFailed", { episodeId: resolveEpisode(episodeId), sync: true }));
+
+const jobsCmd = program.command("jobs").description("生成队列（provider 任务与断点查询）");
+jobsCmd
+  .command("list")
+  .option("-s, --status <status>", "queued | running | done | failed")
+  .action((o: { status?: string }) => {
+    console.log(JSON.stringify(listJobs(o.status as never), null, 2));
+  });
+jobsCmd
+  .command("submit")
+  .description("提交一段到 provider 队列（默认走首个已配置 provider；无 key 回落 mock）")
+  .argument("<segId>")
+  .option("-p, --provider <id>", "seedance | comfyui | mock")
+  .action((segId: string, o: { provider?: string }) => {
+    const state = loadState();
+    for (const e of state.episodes) {
+      const s = e.segments.find((x) => x.id === segId || x.code === segId);
+      if (!s) continue;
+      const targetId = s.id;
+      const kf = e.keyframes.find((k) => k.id === s.fromKeyframeId);
+      enqueue({
+        kind: "segment",
+        targetId,
+        providerId: o.provider,
+        injection: {
+          firstFrame: kf?.pickedVariantId ? `variant:${kf.pickedVariantId}` : undefined,
+          prompt: s.videoPrompt,
+          seed: s.variants.find((v) => v.id === s.pickedVariantId)?.seed,
+          length: s.duration,
+          resolution: s.resolution,
+          modelId: s.modelId,
+        },
+      }).then((job) => console.log(JSON.stringify(job, null, 2)));
+      return;
+    }
+    throw new Error(`segment ${segId} 不存在`);
+  });
 
 const pipeline = program.command("pipeline").description("一键管线（计划预审 → 批量执行 → 粗剪清单）");
 pipeline

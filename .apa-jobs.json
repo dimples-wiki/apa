@@ -1,0 +1,13 @@
+[
+  {
+    "id": "job-1792253605480-6oab",
+    "kind": "segment",
+    "targetId": "seg-004",
+    "episodeId": "ep-001",
+    "provider": "mock",
+    "status": "done",
+    "createdAt": "2026-10-17T16:13:25.480Z",
+    "cost": 7.35,
+    "finishedAt": "2026-10-17T16:13:25.481Z"
+  }
+]
