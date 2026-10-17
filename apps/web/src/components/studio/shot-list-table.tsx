@@ -77,7 +77,7 @@ function BeatChip({
   studio: Studio;
   beatId?: string;
 }) {
-  const beat = studio.episode.beats.find((b) => b.id === beatId);
+  const beat = studio.episode?.beats.find((b) => b.id === beatId);
   if (!beat) {
     return (
       <Tooltip>
@@ -400,7 +400,9 @@ export function ShotListTable({
   studio: Studio;
   onOpenCandidates: () => void;
 }) {
-  const { episode, selectedIds, toggleSelect, gateOpen, stats } = studio;
+  const { selectedIds, toggleSelect, gateOpen, stats } = studio;
+  const episode = studio.episode;
+  if (!episode) return null;
   const anySelected = selectedIds.size > 0;
   const draftKfSelected = episode.keyframes.filter(
     (k) => selectedIds.has(k.id) && k.status === "draft",

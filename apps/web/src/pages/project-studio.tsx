@@ -7,15 +7,26 @@ import {
   ListChecks,
   PenLine,
   Redo2,
+  Sparkles,
   Undo2,
+  Workflow,
 } from "lucide-react";
 import { Link, useParams } from "react-router";
 import { formatDuration, formatMoney } from "@dimples/apa-shared";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useStudio, type StudioMode } from "@/hooks/use-studio";
+import { useUiBridge } from "@/hooks/use-ui-bridge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { CanvasView } from "@/components/studio/canvas-view";
 import { EpisodeStrip } from "@/components/studio/episode-strip";
 import { ShotListTable } from "@/components/studio/shot-list-table";
 import { CandidateDrawer } from "@/components/studio/candidate-drawer";
@@ -25,6 +36,7 @@ import { InsightView } from "@/components/studio/insight-view";
 
 const MODES: { key: StudioMode; label: string; icon: typeof ListChecks }[] = [
   { key: "shotlist", label: "制作清单", icon: ListChecks },
+  { key: "canvas", label: "管线画布", icon: Workflow },
   { key: "preview", label: "拼装预览", icon: Layers },
   { key: "plan", label: "剧本规划", icon: PenLine },
   { key: "insight", label: "质检素材", icon: FileCheck },
@@ -41,10 +53,49 @@ export default function ProjectStudioPage() {
   const { episode, stats, budget, canUndo, canRedo, undo, redo } = studio;
   const [mode, setMode] = useState<StudioMode>("shotlist");
   const [drawerOpen, setDrawerOpen] = useState(false);
+  useUiBridge();
+
+  /** 一键管线（环节级批量执行 + 计划预审；与 CLI apa pipeline / MCP pipeline_* 同一 ops） */
+  function pipeline(op: "pipeline.plan" | "pipeline.execute" | "pipeline.finalize", stage?: string) {
+    if (!episode) return;
+    const eid = episode.id;
+    fetch("/api/studio/op", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        op,
+        args: { episodeId: eid, ...(stage ? { stage, sync: true } : {}) },
+      }),
+    })
+      .then((r) => r.json())
+      .then((res) => {
+        const note =
+          res?.result?.note ??
+          res?.result?.blocked ??
+          (res?.result?.manifest ? "清单已生成（见控制台）" : "已完成");
+        console.log("[pipeline]", op, res?.result);
+        toast(note as string);
+        if (op === "pipeline.plan" || op === "pipeline.execute") {
+          fetch("/api/studio/state")
+            .then((r) => r.json())
+            .then((s: { episodes: typeof episode }) => {
+              // 以 server 为准刷新（本地乐观与 server 完成态对齐）
+              studio.setSelectedIds(new Set());
+              window.dispatchEvent(new CustomEvent("apa:state-refreshed", { detail: s.episodes }));
+            });
+        }
+      });
+  }
 
   return (
     <TooltipProvider delayDuration={200}>
       <div className="flex h-svh flex-col bg-background">
+        {!episode ? (
+          <div className="flex flex-1 items-center justify-center text-[13px] text-muted-foreground">
+            正在从 store 载入工作台…
+          </div>
+        ) : (
+        <>
         {/* ── 顶栏 ── */}
         <header className="flex h-12 shrink-0 items-center gap-2 border-b px-3">
           <Button variant="ghost" size="icon" className="size-8" asChild>
@@ -146,6 +197,28 @@ export default function ProjectStudioPage() {
               <span className="text-border">|</span>
               <span>{formatDuration(stats.duration)}</span>
             </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm" variant="outline" className="hidden gap-1.5 md:inline-flex">
+                  <Sparkles className="size-3.5" />
+                  一键管线
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem onClick={() => pipeline("pipeline.plan")}>
+                  生成计划（剧本→帧骨架）
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => pipeline("pipeline.execute", "keyframes")}>
+                  执行：批量生成静帧
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => pipeline("pipeline.execute", "videos")}>
+                  执行：批量生成视频
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => pipeline("pipeline.finalize")}>
+                  粗剪清单（导出）
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Separator orientation="vertical" className="hidden h-5 sm:block" />
             <div className="hidden items-center sm:flex">
               <Button
@@ -188,6 +261,8 @@ export default function ProjectStudioPage() {
         {/* ── 主体 ── */}
         {mode === "shotlist" ? (
           <ShotListTable studio={studio} onOpenCandidates={() => setDrawerOpen(true)} />
+        ) : mode === "canvas" ? (
+          <CanvasView studio={studio} onOpenCandidates={() => setDrawerOpen(true)} />
         ) : mode === "preview" ? (
           <PreviewView studio={studio} onOpenCandidates={() => setDrawerOpen(true)} />
         ) : mode === "insight" ? (
@@ -197,6 +272,8 @@ export default function ProjectStudioPage() {
         )}
 
         <CandidateDrawer studio={studio} open={drawerOpen} onOpenChange={setDrawerOpen} />
+        </>
+        )}
       </div>
     </TooltipProvider>
   );

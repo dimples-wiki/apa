@@ -35,7 +35,7 @@ const typeAccent: Record<ReferenceType, string> = {
 };
 
 function VersionCard({ studio, versionId }: { studio: Studio; versionId: string }) {
-  const v = studio.episode.versions?.find((x) => x.id === versionId);
+  const v = studio.episode?.versions?.find((x) => x.id === versionId);
   if (!v) return null;
   const sections: { title: string; items: string[]; tone: string }[] = [
     { title: "依据", items: v.basis, tone: "text-muted-foreground" },
@@ -93,6 +93,7 @@ function VersionCard({ studio, versionId }: { studio: Studio; versionId: string 
 /** 质检页：版本档案（依据→问题→改法→量化效果） + 管线校验报告 + 素材库 */
 export function InsightView({ studio }: { studio: Studio }) {
   const { episode, budget } = studio;
+  if (!episode) return null;
   const versions = episode.versions ?? [];
   const [versionId, setVersionId] = useState(versions.find((v) => v.isCurrent)?.id ?? versions[0]?.id);
   const checks = useMemo(() => validateEpisode(episode, budget), [episode, budget]);

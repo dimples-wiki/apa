@@ -13,6 +13,7 @@
     "deploy:pages": "bash scripts/deploy-pages.sh"
   },
   "devDependencies": {
+    "@types/ws": "catalog:",
     "vite-plus": "catalog:"
   },
   "devEngines": {
@@ -24,5 +25,8 @@
   },
   "engines": {
     "node": ">=22.18.0"
+  },
+  "dependencies": {
+    "ws": "catalog:"
   }
 }

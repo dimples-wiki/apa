@@ -3,9 +3,12 @@ import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
+import { WebSocketServer } from "ws";
 import { Hono } from "hono";
 import { type Actor, type Costume, type Project, type Scene } from "@dimples/apa-shared";
 import { actors, costumes, projects, scenes } from "./data.ts";
+import { loadState, mutate, scheduleCompletion } from "./store.ts";
+import { bridgeMessage, buildMcpApp, registerBridgeSocket } from "./mcp.ts";
 
 // monorepo 开发态优先用 apps/web/dist（最新构建）；npm 发布包内无该目录时回落打包快照
 const devWebDist = fileURLToPath(new URL("../../web/dist", import.meta.url));
@@ -20,6 +23,25 @@ export function startServer(opts: { port: number; hostname: string }) {
   app.get("/api/actors", (c) => c.json(actors));
   app.get("/api/scenes", (c) => c.json(scenes));
   app.get("/api/costumes", (c) => c.json(costumes));
+
+  // ── 工作台 studio API：store 单一真源（CLI/MCP/UI 四端同构）──
+  app.get("/api/studio/state", (c) => c.json(loadState()));
+  app.post("/api/studio/op", async (c) => {
+    const body = await c.req.json<{ op: string; args?: Record<string, unknown> }>();
+    if (!body.op) return c.json({ error: "op 必填" }, 400);
+    try {
+      const { result, state } = mutate(body.op, body.args ?? {});
+      scheduleCompletion(body.op, body.args ?? {});
+      return c.json({ ok: true, result: result ?? null, state });
+    } catch (e) {
+      return c.json({ ok: false, error: (e as Error).message }, 422);
+    }
+  });
+
+  // ── MCP（streamable HTTP）：业务级工具 + UI 桥工具 ──
+  app.route("/mcp", buildMcpApp());
+
+  // ── UI 桥：页面加载时 WS 注册执行器，MCP ui_* 工具经此转发到页面执行 ──
 
   // —— 创建（内存 store，重启即回演示数据）——
   const seq = (prefix: string, existing: { id: string }[]) => {
@@ -113,11 +135,33 @@ export function startServer(opts: { port: number; hostname: string }) {
   app.get("*", async (c) => {
     try {
       const html = await readFile(`${webDist}/index.html`, "utf8");
+      // SPA fallback 的 HTML 同样必须 no-cache——否则发新版后深链路由缓存旧 HTML 引已替换的资源
+      c.header("Cache-Control", "no-cache");
       return c.html(html);
     } catch {
       return c.text("前端产物缺失，请先在 apps/web 执行构建（vp build）", 404);
     }
   });
 
-  serve({ fetch: app.fetch, port: opts.port, hostname: opts.hostname });
+  const server = serve({ fetch: app.fetch, port: opts.port, hostname: opts.hostname });
+
+  const wss = new WebSocketServer({ noServer: true });
+  wss.on("connection", (ws) => {
+    registerBridgeSocket({ send: (s) => ws.send(s) });
+    ws.on("message", (data) => {
+      try {
+        bridgeMessage(JSON.parse(String(data)));
+      } catch {
+        // 忽略非 JSON 帧
+      }
+    });
+    ws.on("close", () => registerBridgeSocket(null));
+  });
+  server.on("upgrade", (req, socket, head) => {
+    if (req.url?.startsWith("/ws/ui-bridge")) {
+      wss.handleUpgrade(req, socket, head, (ws) => wss.emit("connection", ws, req));
+    } else {
+      socket.destroy();
+    }
+  });
 }

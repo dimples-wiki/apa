@@ -71,6 +71,7 @@ export function CandidateDrawer({
   onOpenChange: (open: boolean) => void;
 }) {
   const { episode, activeKeyframeId, activeSegmentId, updateKeyframe, updateSegment } = studio;
+  if (!episode) return null;
   const kf = episode.keyframes.find((k) => k.id === activeKeyframeId);
   const seg = episode.segments.find((s) => s.id === activeSegmentId);
   const isKf = Boolean(kf) && !seg;

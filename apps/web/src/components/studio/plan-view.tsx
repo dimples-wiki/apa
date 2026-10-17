@@ -25,6 +25,7 @@ const beatTag: Record<BeatKind, string> = {
 /** 剧本规划：集元数据 + 四节拍 + 关键帧规划（拆集产物，人可改） */
 export function PlanView({ studio }: { studio: Studio }) {
   const { episode, updateEpisodeMeta, planKeyframesFromBeats, alignBeatChanges } = studio;
+  if (!episode) return null;
   const plannedDur = episode.segments.reduce((a, s) => a + s.duration, 0);
   const target = episode.targetDurationSec ?? 75;
   const unlinked = episode.keyframes.filter((k) => !k.beatId).length;
@@ -39,12 +40,12 @@ export function PlanView({ studio }: { studio: Studio }) {
             <Label className="text-[12px] text-muted-foreground">本集标题 / 戏剧目标</Label>
             <Input
               value={episode.title}
-              onChange={(e) => updateEpisodeMeta({ title: e.target.value })}
+              onChange={(e) => updateEpisodeMeta(episode.id, { title: e.target.value })}
               className="h-9 text-[13px]"
             />
             <Textarea
               value={episode.dramaticGoal}
-              onChange={(e) => updateEpisodeMeta({ dramaticGoal: e.target.value })}
+              onChange={(e) => updateEpisodeMeta(episode.id, { dramaticGoal: e.target.value })}
               placeholder="这一集要把观众钉在哪？（戏剧目标）"
               rows={2}
               className="resize-none text-[13px]"
@@ -54,7 +55,7 @@ export function PlanView({ studio }: { studio: Studio }) {
             <Label className="text-[12px] text-muted-foreground">本集大纲（拆集与关键帧规划的依据）</Label>
             <Textarea
               value={episode.synopsis}
-              onChange={(e) => updateEpisodeMeta({ synopsis: e.target.value })}
+              onChange={(e) => updateEpisodeMeta(episode.id, { synopsis: e.target.value })}
               placeholder="先有故事，再决定每一帧要不要存在…"
               rows={4}
               className="resize-none text-[13px] leading-5"
@@ -97,7 +98,7 @@ export function PlanView({ studio }: { studio: Studio }) {
               variant="outline"
               size="sm"
               className="h-7 gap-1.5 text-[12px]"
-              onClick={planKeyframesFromBeats}
+              onClick={() => planKeyframesFromBeats(episode.id)}
               disabled={episode.beats.length === 0}
             >
               <Sparkles className="size-3.5" />
@@ -135,7 +136,7 @@ export function PlanView({ studio }: { studio: Studio }) {
                   <button
                     type="button"
                     onClick={() => {
-                      alignBeatChanges(b.id);
+                      alignBeatChanges(episode.id, b.id);
                       setAligned((p) => ({ ...p, [b.id]: true }));
                     }}
                     className={cn(

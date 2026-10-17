@@ -170,6 +170,9 @@ catalogs:
     '@types/node':
       specifier: ^24
       version: 24.19.2
+    '@types/ws':
+      specifier: ^8.18.2
+      version: 8.18.2
     cn:
       specifier: ^0.4.0
       version: 0.4.0
@@ -194,6 +197,9 @@ catalogs:
     vite-plus:
       specifier: 1.2.0
       version: 1.2.0
+    ws:
+      specifier: ^8.22.0
+      version: 8.22.0
 
 overrides:
   vite@*: npm:@voidzero-dev/vite-plus-core@1.2.0
@@ -201,7 +207,14 @@ overrides:
 importers:
 
   .:
+    dependencies:
+      ws:
+        specifier: 'catalog:'
+        version: 8.22.0
     devDependencies:
+      '@types/ws':
+        specifier: 'catalog:'
+        version: 8.18.2
       vite-plus:
         specifier: 'catalog:'
         version: 1.2.0(@types/node@24.19.2)(@vitest/ui@5.0.4)(jiti@2.7.0)(typescript@7.0.2)(yaml@2.9.1)
@@ -220,10 +233,16 @@ importers:
       hono:
         specifier: ^4.9.0
         version: 4.13.13
+      ws:
+        specifier: 'catalog:'
+        version: 8.22.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
         version: 24.19.2
+      '@types/ws':
+        specifier: 'catalog:'
+        version: 8.18.2
       tsdown:
         specifier: 'catalog:'
         version: 0.23.1(typescript@7.0.2)
@@ -1702,6 +1721,9 @@ packages:
 
   '@types/react@19.3.0':
     resolution: {integrity: sha512-N0rFCuH9YoxG9/m61l9MfpJKfmLOVU0em7ipIz6TRgSSkvReLB9vL85GB+yr8Bs5leqpvg96JSwF4ZS1s4viQg==}
+
+  '@types/ws@8.18.2':
+    resolution: {integrity: sha512-67MQl+fpWKVTT1NYdnmo3U4sc/xPo/zQBncVnI74qmQa0z/b+1g6iYqNmGCPbxO+zz2aklb08a0oHfegiVd0/w==}
 
   '@typescript/typescript-aix-ppc64@7.0.2':
     resolution: {integrity: sha512-MTKKkWB7p/0E9xi1d1tHtZ5PiLkGEMIq88pK2CubZjOsLtYTLqhgIgi6zepFa+9GHZ6h05NMCkQxGKiPXMxXtQ==}
@@ -4075,6 +4097,10 @@ snapshots:
   '@types/react@19.3.0':
     dependencies:
       csstype: 3.2.3
+
+  '@types/ws@8.18.2':
+    dependencies:
+      '@types/node': 24.19.2
 
   '@typescript/typescript-aix-ppc64@7.0.2':
     optional: true

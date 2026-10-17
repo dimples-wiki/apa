@@ -200,6 +200,10 @@ export interface Keyframe {
   code: string;
   /** 挂节拍（剧本传导） */
   beatId?: string;
+  /** 景别（七档，社区分镜表收敛列） */
+  shotSize?: string;
+  /** 灯光氛围标签 */
+  lighting?: string;
   /** 生图提示词（一等公民） */
   imagePrompt: string;
   negativePrompt?: string;
@@ -262,6 +266,8 @@ export interface Segment {
   cost?: number;
   variants: VideoVariant[];
   pickedVariantId?: string;
+  /** 生视频供应商（账单矩阵） */
+  provider?: string;
   /** 段内音频元素（台词/音效/拟音/配乐） */
   cues?: AudioCue[];
   status: SegmentStatus;
@@ -827,6 +833,20 @@ export const mockEpisodes: Episode[] = [
     ],
   },
 ];
+
+/** 工作台全局状态（store 单一真源；CLI/API/MCP/UI 四端共享） */
+export interface StudioState {
+  project: {
+    id: string;
+    name: string;
+    format: string;
+    aspectRatio: AspectRatio;
+    defaultModelId: string;
+    defaultResolution: string;
+    episodeCount: number;
+  };
+  episodes: Episode[];
+}
 
 /** 参考资产库（一致性资产先行） */
 export const mockReferenceAssets: ReferenceAsset[] = [

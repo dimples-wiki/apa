@@ -89,22 +89,13 @@ export function PreviewView({
   onOpenCandidates: () => void;
 }) {
   const { episode } = studio;
-  const total = episode.segments.reduce((a, s) => a + s.duration, 0);
+  const total = episode ? episode.segments.reduce((a, s) => a + s.duration, 0) : 0;
   const [playhead, setPlayhead] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [insertAt, setInsertAt] = useState<string | null>(null);
   const [markers, setMarkers] = useState<{ atSec: number; note: string }[]>([]);
 
   const audioTracks: AudioTrackKind[] = ["voice", "sfx", "ambience", "music"];
-
-  const activeSeg =
-    episode.segments.find((s) => s.id === studio.activeSegmentId) ??
-    episode.segments.find((s) => s.status === "ready") ??
-    episode.segments[0];
-  const activeKf = activeSeg
-    ? episode.keyframes.find((k) => k.id === activeSeg.fromKeyframeId)
-    : episode.keyframes[0];
-  const model = activeSeg ? getModel(activeSeg.modelId) : null;
 
   useEffect(() => {
     if (!playing || total === 0) return;
@@ -119,6 +110,17 @@ export function PreviewView({
     }, 100);
     return () => clearInterval(t);
   }, [playing, total]);
+
+  if (!episode) return null;
+
+  const activeSeg =
+    episode.segments.find((s) => s.id === studio.activeSegmentId) ??
+    episode.segments.find((s) => s.status === "ready") ??
+    episode.segments[0];
+  const activeKf = activeSeg
+    ? episode.keyframes.find((k) => k.id === activeSeg.fromKeyframeId)
+    : episode.keyframes[0];
+  const model = activeSeg ? getModel(activeSeg.modelId) : null;
 
   function togglePlay() {
     if (!playing && playhead >= total) setPlayhead(0);

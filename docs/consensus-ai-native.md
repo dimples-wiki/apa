@@ -188,3 +188,64 @@ interface Episode {
 4. **质检视图**：validateEpisode 不变式检查报告（档位合法/首帧定稿/失败归因/待重写清零/备案/钩子/预算/目标时长），fail/warn 可跳转。
 5. **素材库视图**：一致性资产（角色/场景/服装/道具/风格）独立管理页，含权重与被引用数。
 6. **打标记审片流**：播放器打标记（M 键）+时间线旗标+标记列表；播放快捷键体系（空格/逐镜/秒帧）。
+
+---
+
+# 七、v3 架构升级（2026-10-17 凌晨，四路调研收敛后定稿）
+
+调研依据：docs/research/{open-source-studios,comfyui-canvas,community-workflows,webmcp-cli}.md（12 个开源项目 + ComfyUI 生态 + 中文社区工作流 + webmcp/CLI 范式）。
+
+## 7.1 四端同构：store 单一真源 + 统一 ops 注册表（本周期最高优先）
+
+```
+packages/shared/src/studio-ops.ts   ops 注册表（纯函数 state+args→state'，无 IO，可测试）
+apps/server/src/store.ts            JSON 文件持久化（apa.json，原子写；无文件时 seed mock）
+apps/server/src/routes              GET /api/studio/state · POST /api/studio/op {op,args}
+apps/server/src/mcp                 /mcp 最小 MCP（streamable HTTP）：工具=ops 镜像+状态+校验+UI 桥
+apps/server/src/cli.ts              commander 薄壳：apa <资源><动作> → 同一 ops
+apps/web use-studio.ts              mutation 走 POST /api/studio/op（乐观更新+本地撤销栈不变）
+```
+判据（调研 A）：能否无 UI 跑通全流程、AI 操作面是数据而非按钮。CLI 命令与 ops 一一映射（Remotion 薄壳模式 + Supabase 资源-动作命名）：
+```
+apa state [episodeId]            与 MCP get_state 同一函数（三端同一真相）
+apa validate [episodeId]
+apa op <name> [--json '<args>']  逃生舱
+apa keyframe generate <id> | pick <id> <variantId> | reject <id> <variantId> <mode>
+apa segment generate <id> | attribute <id> <mode>
+apa batch keyframes | videos | retry
+apa pipeline plan | execute --stage keyframes|videos | finalize
+```
+
+## 7.2 "一键式"定义（调研 A/C 收敛）
+
+一键 = **环节级批量执行 + 计划预审 + 断点续跑**，不是"一句话到成片"（付费短剧的付费点恰是全自动最不可靠处）。三个一键命令，全部先产出可审计划：
+1. `pipeline plan`：剧本→拆集→节拍→关键帧规划→段切分（档位吸附），产出计划供人审（对应社区"分镜表初稿"）
+2. `pipeline execute --stage keyframes|videos`：按已审计划批量执行（两阶段闸门内建；单镜失败不阻断；attempts 预算内自动重试，超限标"必须换镜重写"）
+3. `pipeline finalize`：粗剪清单——picked 变体按时间线导出结构化 JSON（镜号/起止/时长/资产路径/台词，命名规范 `EP01_SEG01_v3.mp4`），可导剪映草稿/EDL（命名地狱的根治）
+人工审点保持三个（社区收敛）：选脸（候选池）、关键帧（一致性）、选片（候选池）。
+
+## 7.3 画布视图（第五模式，回应"画布型怎么转直观浏览"）
+
+关键帧=节点、演绎段=有向边，链式 DAG 用 SVG 手绘（零依赖），与时间线/清单同一 state：
+- 节点=关键帧（状态色/缩略占位/景别缩写），边=演绎段（状态色/时长/成本标签）
+- **关键路径高亮**：未定稿帧阻塞下游段的链路标红——"哪个帧卡住全链"一眼可见（画布转直观浏览的核心价值：生产瓶颈可视化）
+- 交互：点节点开候选抽屉、节点间"+"插帧、悬停摘要；"导出 ComfyUI JSON"按钮（占位，批 3 实装——每镜头=工作流模板+命名注入点）
+- 定位（调研 B）：画布=生产关系图+高级视图，剧级管理仍归清单/时间线
+
+## 7.4 webmcp：/mcp 端点（业务级为主 + UI 桥兜底）
+
+- 业务级工具（读写与 REST/UI 同一 store）：get_state / list_ops / call_op / validate / pipeline_plan / pipeline_execute / pipeline_finalize
+- UI 桥工具（DOM 级兜底，细到 hover）：页面加载时 WS 连 server 注册执行器；工具 ui_click / ui_hover / ui_query {selector,prop} / ui_snapshot（返回语义树文本）——转发页面执行并回结果。hover 断言=ui_hover 后 ui_query 查 tooltip 可见性
+- 页面侧：关键控件补 aria-label（语义定位优先）、交互态补 data-testid（兜底）
+- 协议：最小 MCP streamable HTTP（JSON-RPC：initialize/tools/list/tools/call），零新依赖，后可换 @hono/mcp
+
+## 7.5 数据模型小增补（对照社区分镜表列结构）
+
+- Keyframe 补 shotSize?（景别七档，旧模型概念回迁）与 lighting?——shot list 显示景别缩写列（社区列结构收敛项）
+- Segment 补 provider?（供应商，cues 已有；段级生视频也记）——为账单矩阵铺路
+- store 顶层补 project 名/画幅/默认模型（原 mockStudioProject 并入）
+
+## 7.6 批 3 预埋（本期只做接口不做实现）
+
+- providers 接口：`generate(keyframe|segment, context) → variants`，context 含一致性参考/首尾帧来源/档位；ComfyUI provider（模板+注入点）与 Seedance provider 留空实现
+- 首尾帧衔接锁数据流：segment.toKeyframe 的 picked 变体自动登记为下游段 fromVariantId 候选（本期先做数据字段，自动流批 3 接图后生效）
