@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   Clapperboard,
@@ -20,6 +20,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { cn } from "@/lib/utils";
 import { useStudio, type StudioMode } from "@/hooks/use-studio";
 import { useUiBridge } from "@/hooks/use-ui-bridge";
+import { initWebMcp, registerCommand } from "@/lib/webmcp";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -54,6 +55,89 @@ export default function ProjectStudioPage() {
   const [mode, setMode] = useState<StudioMode>("shotlist");
   const [drawerOpen, setDrawerOpen] = useState(false);
   useUiBridge();
+
+  // ── Chrome WebMCP / window.__apaWebMcp：页面级命令总线（事无巨细的工具面）──
+  const studioRef = useRef(studio);
+  studioRef.current = studio;
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+  const drawerRef = useRef(drawerOpen);
+  drawerRef.current = drawerOpen;
+
+  useEffect(() => {
+    const s = () => studioRef.current;
+    const resolveKf = (id: string) => {
+      const e = s().episode;
+      return e?.keyframes.find((k) => k.id === id || k.code === id);
+    };
+    const resolveSeg = (id: string) => {
+      const e = s().episode;
+      return e?.segments.find((x) => x.id === id || x.code === id);
+    };
+    const requireKf = (id: string) => {
+      const k = resolveKf(id);
+      if (!k) throw new Error(`关键帧不存在：${id}`);
+      return k;
+    };
+    const requireSeg = (id: string) => {
+      const x = resolveSeg(id);
+      if (!x) throw new Error(`演绎段不存在：${id}`);
+      return x;
+    };
+
+    registerCommand("ui_state", () => ({
+      mode: modeRef.current,
+      episode: s().episode?.id ?? null,
+      activeKeyframeId: s().activeKeyframeId,
+      activeSegmentId: s().activeSegmentId,
+      drawerOpen: drawerRef.current,
+      selected: [...s().selectedIds],
+      gateOpen: s().gateOpen,
+      stats: s().stats,
+    }));
+    registerCommand("navigate", (a) => setMode(a.mode as StudioMode));
+    registerCommand("select_episode", (a) => {
+      const idx = Number(a.index ?? 1) - 1;
+      s().setActiveEpIndex(Math.max(0, idx));
+      s().setSelectedIds(new Set());
+    });
+    registerCommand("select_keyframe", (a) => {
+      const k = requireKf(String(a.id));
+      s().setActiveKeyframeId(k.id);
+      s().setActiveSegmentId(null);
+      setDrawerOpen(true);
+    });
+    registerCommand("select_segment", (a) => {
+      const x = requireSeg(String(a.id));
+      s().setActiveSegmentId(x.id);
+      s().setActiveKeyframeId(null);
+      setDrawerOpen(true);
+    });
+    registerCommand("keyframe_generate", (a) => s().generateKeyframe(requireKf(String(a.id)).id));
+    registerCommand("keyframe_pick", (a) =>
+      s().pickImageVariant(requireKf(String(a.id)).id, String(a.variantId)),
+    );
+    registerCommand("keyframe_reject", (a) =>
+      s().rejectImageVariant(requireKf(String(a.id)).id, String(a.variantId), String(a.reason)),
+    );
+    registerCommand("keyframe_insert", (a) => {
+      const k = requireKf(String(a.afterId));
+      s().insertKeyframes(k.id, Number(a.n ?? 1));
+    });
+    registerCommand("segment_generate", (a) => s().generateSegment(requireSeg(String(a.id)).id));
+    registerCommand("segment_attribute", (a) =>
+      s().attributeFailure(requireSeg(String(a.id)).id, String(a.mode)),
+    );
+    registerCommand("batch_generate_keyframes", () => s().batchGenerateKeyframes());
+    registerCommand("batch_generate_segments", () => s().batchGenerateSegments());
+    registerCommand("batch_retry", () => s().batchRetryFailed());
+    registerCommand("undo", () => s().undo());
+    registerCommand("redo", () => s().redo());
+    registerCommand("open_candidates", () => setDrawerOpen(true));
+    registerCommand("close_drawer", () => setDrawerOpen(false));
+
+    initWebMcp();
+  }, []);
 
   /** 一键管线（环节级批量执行 + 计划预审；与 CLI apa pipeline / MCP pipeline_* 同一 ops） */
   function pipeline(op: "pipeline.plan" | "pipeline.execute" | "pipeline.finalize", stage?: string) {
