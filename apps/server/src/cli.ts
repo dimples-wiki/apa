@@ -5,10 +5,36 @@ import { APP_VERSION } from "@dimples/apa-shared";
 import { startServer } from "./server.ts";
 import { loadState, mutate, scheduleCompletion, storePathOf } from "./store.ts";
 import { enqueue, listJobs } from "./queue.ts";
+import { mkdirSync, writeFileSync, existsSync } from "node:fs";
+import { join, resolve } from "node:path";
 
 const program = new Command();
 
 program.name("apa").description("APA — AI Pipeline for Auteur").version(APP_VERSION);
+
+/** apa open <dir>：初始化/绑定片项目文件夹（film.json+overrides.json+APA.md） */
+function openProject(dir: string) {
+  const target = resolve(dir);
+  mkdirSync(target, { recursive: true });
+  const film = join(target, "film.json");
+  if (!existsSync(film)) {
+    const state = loadState();
+    writeFileSync(film, JSON.stringify(state, null, 2));
+    console.log(`  ✓ 已 seed ${film}`);
+  } else {
+    console.log(`  ✓ 已绑定 ${film}`);
+  }
+  if (!existsSync(join(target, "overrides.json")))
+    writeFileSync(join(target, "overrides.json"), JSON.stringify({ shadows: [], locks: [] }, null, 2));
+  // 手册
+  process.env.APA_PROJECT = target;
+  const { writeManual } = require("./store.ts") as { writeManual: () => string };
+  writeManual();
+  console.log(`  ✓ 手册 ${join(target, "APA.md")}`);
+  console.log(`\n  下一步：`);
+  console.log(`    APA_PROJECT=${target} node apps/server/dist/cli.mjs serve`);
+  console.log(`    或让 coding agent 直接改 ${film}（先读 ${join(target, "APA.md")}）\n`);
+}
 
 function startServe(opts: { port: string; host: string; open: boolean }) {
   const port = Number.parseInt(opts.port, 10);
@@ -16,7 +42,8 @@ function startServe(opts: { port: string; host: string; open: boolean }) {
   startServer({ port, hostname: opts.host });
   console.log(`\n  APA 已启动 → ${url}`);
   console.log(`  MCP 端点   → ${url}/mcp（业务级工具 + UI 桥）`);
-  console.log(`  store     → ${storePathOf()}\n`);
+  console.log(`  film      → ${storePathOf()}`);
+  console.log(`  overrides → ${storePathOf().replace("film.json", "overrides.json")}\n`);
   if (opts.open) {
     const opener = process.platform === "darwin" ? "open" : "xdg-open";
     spawn(opener, [url], { detached: true, stdio: "ignore" }).unref();
@@ -41,13 +68,13 @@ function resolveEpisode(id?: string): string {
 }
 
 function run(op: string, args: Record<string, unknown>, opts?: { compact?: boolean }) {
-  const { result } = mutate(op, args);
+  const { result } = mutate(op, args, "agent");
   const out = result ?? { ok: true };
   console.log(JSON.stringify(out, null, opts?.compact ? 0 : 2));
 }
 
 function asyncOp(op: string, args: Record<string, unknown>) {
-  mutate(op, args);
+  mutate(op, args, "agent");
   scheduleCompletion(op, args);
   console.log(JSON.stringify({ ok: true, note: `已提交（delayMs=${args.delayMs ?? 0}）` }, null, 2));
 }
@@ -200,6 +227,47 @@ jobsCmd
       return;
     }
     throw new Error(`segment ${segId} 不存在`);
+  });
+
+program
+  .command("open")
+  .description("初始化/绑定片项目文件夹（film.json + overrides.json + APA.md 手册）")
+  .argument("[dir]", "项目目录", "apa-project")
+  .action((dir: string) => openProject(dir));
+
+program
+  .command("look")
+  .description("确定性审片自检（档位/台词估时/节拍覆盖/覆写冲突）——agent 生成后必跑")
+  .action(() => {
+    const { runLook } = require("./look.ts") as { runLook: () => unknown };
+    console.log(JSON.stringify(runLook(), null, 2));
+  });
+
+program
+  .command("manual")
+  .description("打印片项目手册（coding agent 按此操作；极薄 skill 只路由到这里）")
+  .action(() => {
+    process.env.APA_PROJECT = process.env.APA_PROJECT || join(process.cwd(), "apa-project");
+    const { writeManual } = require("./store.ts") as { writeManual: () => string };
+    process.stdout.write(writeManual());
+  });
+
+const lockCmd = program.command("lock").description("人的覆写层：锁定实体（agent 拒改）");
+lockCmd
+  .command("on")
+  .argument("<entity>", "如 keyframe:kf-001")
+  .action((entity: string) => {
+    const { toggleLock } = require("./store.ts") as { toggleLock: (e: string, l: boolean) => void };
+    toggleLock(entity, true);
+    console.log(JSON.stringify({ ok: true, entity, locked: true }));
+  });
+lockCmd
+  .command("off")
+  .argument("<entity>")
+  .action((entity: string) => {
+    const { toggleLock } = require("./store.ts") as { toggleLock: (e: string, l: boolean) => void };
+    toggleLock(entity, false);
+    console.log(JSON.stringify({ ok: true, entity, locked: false }));
   });
 
 const pipeline = program.command("pipeline").description("一键管线（计划预审 → 批量执行 → 粗剪清单）");

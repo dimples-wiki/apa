@@ -249,3 +249,27 @@ apa pipeline plan | execute --stage keyframes|videos | finalize
 
 - providers 接口：`generate(keyframe|segment, context) → variants`，context 含一致性参考/首尾帧来源/档位；ComfyUI provider（模板+注入点）与 Seedance provider 留空实现
 - 首尾帧衔接锁数据流：segment.toKeyframe 的 picked 变体自动登记为下游段 fromVariantId 候选（本期先做数据字段，自动流批 3 接图后生效）
+
+---
+
+# 八、v4 重构：片协议优先（OpenFilm 范式，2026-10-18）
+
+调研：docs/research/openfilm.md（OpenFilm = coding agent 写片子的开源范式：film.html 即协议、Studio 是宿主、人机共编靠 overrides、locked 轨道 agent 不许改、QA 命令化 look、极薄 skill+版本化手册）。
+
+## 四问结论
+1. 大牛动作：把工作台重定义为"协议+多宿主"——agent 的工作目录就是片子本身（文件可 diff），UI 降格为协议的一个编辑器实现；agent 的 QA 自检命令化（apa look）
+2. 底层材料：OpenFilm SPEC/MANUAL（协议设计一手）；确定性校验规则表
+3. 方法：协议先行、严格解析带行号报错、示例项目
+4. 客观铁证：同一项目文件夹，人（UI）/agent（Claude Code 直接改文件）/CLI 三操作者交替操作，互不覆盖不丢数据（overrides+locks 可判定）
+
+## 片协议 apa-film/0.3（项目=文件夹）
+```
+<project-dir>/
+  APA.md            手册（管线规则/档位/守则/协作规则；apa manual 打印，apa open 时生成）
+  film.json         主协议（StudioState：project+episodes；声明式、人可 diff、agent 直接改）
+  overrides.json    人的覆写层（UI 编辑 shadow：实体/字段/值/时间）+ locks（locked 实体 agent 拒改）
+```
+- UI 的每次人改（by=ui）记 shadow 到 overrides.json；agent（by=agent，CLI/MCP 默认）改 locked 实体直接 422
+- `apa open <dir>`：绑定项目文件夹 + 打开 Studio + 生成/更新 APA.md
+- `apa look`：确定性自检（validateEpisode + 台词字数/4.1 字每秒 vs 段时长误差 + 节拍全覆盖 + 命名规范 + overrides 冲突报告）
+- skill 薄化：~/.agents/skills/apa/SKILL.md 只路由（运行 apa manual 按手册做），原则层保留 ai-drama-director

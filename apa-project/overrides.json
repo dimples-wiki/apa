@@ -1,0 +1,11 @@
+{
+  "shadows": [
+    {
+      "entity": "keyframe:kf-001.imagePrompt",
+      "field": "imagePrompt",
+      "value": "人改：台灯暖光下重读台词，座机屏幕反光里带着泪",
+      "at": "2026-10-19T01:58:39.564Z"
+    }
+  ],
+  "locks": []
+}

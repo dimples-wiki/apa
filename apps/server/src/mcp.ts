@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { Hono } from "hono";
 import { OP_MAP, OPS, type StudioState } from "@dimples/apa-shared";
-import { loadState, mutate, scheduleCompletion } from "./store.ts";
+import { loadOverrides, loadState, mutate, scheduleCompletion } from "./store.ts";
+import { runLook } from "./look.ts";
 
 /**
  * 最小 MCP server（streamable HTTP，JSON-RPC 2.0）：
@@ -173,6 +174,18 @@ export function buildMcpApp(): Hono {
             properties: { episodeId: { type: "string" } },
           },
         },
+        {
+          name: "look",
+          description:
+            "apa look——确定性审片自检（档位/台词估时/节拍覆盖/人的覆写 shadow 与 locks）。agent 生成后必跑",
+          inputSchema: { type: "object", properties: {} },
+        },
+        {
+          name: "get_overrides",
+          description:
+            "读取人的覆写层：shadows（人在 UI 最近改过的字段——改同字段前先读）与 locks（人锁定的实体，你改会被拒）",
+          inputSchema: { type: "object", properties: {} },
+        },
         ...UI_TOOLS,
       ];
       return respond({ tools: businessTools });
@@ -198,7 +211,7 @@ export function buildMcpApp(): Hono {
             const op = String(args.op ?? "");
             if (!OP_MAP.has(op)) return rpcError(-32602, `未知 op：${op}`);
             const opArgs = (args.args ?? {}) as Record<string, unknown>;
-            const { result: opResult, state } = mutate(op, opArgs);
+            const { result: opResult, state } = mutate(op, opArgs, "agent");
             scheduleCompletion(op, opArgs);
             result = {
               note: (opResult as { note?: string })?.note,
@@ -210,8 +223,16 @@ export function buildMcpApp(): Hono {
             break;
           }
           case "validate": {
-            const { result: r } = mutate("studio.validate", args);
+            const { result: r } = mutate("studio.validate", args, "agent");
             result = (r as { manifest?: unknown })?.manifest;
+            break;
+          }
+          case "look": {
+            result = runLook();
+            break;
+          }
+          case "get_overrides": {
+            result = loadOverrides();
             break;
           }
           case "ui_hover":

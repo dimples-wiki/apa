@@ -33,3 +33,4 @@ dist-ssr
 .claude/worktrees/
 .github/
 .apa-store.json
+.apa-project/

@@ -7,7 +7,8 @@ import { WebSocketServer } from "ws";
 import { Hono } from "hono";
 import { type Actor, type Costume, type Project, type Scene } from "@dimples/apa-shared";
 import { actors, costumes, projects, scenes } from "./data.ts";
-import { loadState, mutate, scheduleCompletion } from "./store.ts";
+import { loadState, loadOverrides, mutate, scheduleCompletion, toggleLock, writeManual } from "./store.ts";
+import { runLook } from "./look.ts";
 import { bridgeMessage, buildMcpApp, registerBridgeSocket } from "./mcp.ts";
 
 // monorepo 开发态优先用 apps/web/dist（最新构建）；npm 发布包内无该目录时回落打包快照
@@ -24,19 +25,38 @@ export function startServer(opts: { port: number; hostname: string }) {
   app.get("/api/scenes", (c) => c.json(scenes));
   app.get("/api/costumes", (c) => c.json(costumes));
 
-  // ── 工作台 studio API：store 单一真源（CLI/MCP/UI 四端同构）──
+  // ── 工作台 studio API：片协议单一真源（UI by=ui；agent 走 CLI/MCP by=agent 受 locks 守卫）──
   app.get("/api/studio/state", (c) => c.json(loadState()));
   app.post("/api/studio/op", async (c) => {
-    const body = await c.req.json<{ op: string; args?: Record<string, unknown> }>();
+    const body = await c.req.json<{
+      op: string;
+      args?: Record<string, unknown>;
+      by?: "ui" | "agent";
+    }>();
     if (!body.op) return c.json({ error: "op 必填" }, 400);
     try {
-      const { result, state } = mutate(body.op, body.args ?? {});
+      const { result, state } = mutate(body.op, body.args ?? {}, body.by ?? "ui");
       scheduleCompletion(body.op, body.args ?? {});
       return c.json({ ok: true, result: result ?? null, state });
     } catch (e) {
       return c.json({ ok: false, error: (e as Error).message }, 422);
     }
   });
+  app.get("/api/studio/overrides", (c) => c.json(loadOverrides()));
+  app.post("/api/studio/lock", async (c) => {
+    const b = await c.req.json<{ entity: string; locked: boolean }>();
+    if (!b.entity) return c.json({ error: "entity 必填" }, 400);
+    toggleLock(b.entity, Boolean(b.locked));
+    return c.json({ ok: true, overrides: loadOverrides() });
+  });
+  app.get("/api/studio/look", (c) => {
+    try {
+      return c.json({ ok: true, report: runLook() });
+    } catch (e) {
+      return c.json({ ok: false, error: (e as Error).message }, 500);
+    }
+  });
+  app.get("/api/studio/manual", (c) => c.text(writeManual()));
 
   // ── MCP（streamable HTTP）：业务级工具 + UI 桥工具 ──
   app.route("/mcp", buildMcpApp());

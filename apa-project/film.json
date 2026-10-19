@@ -1,0 +1,572 @@
+{
+  "project": {
+    "id": "p-007",
+    "name": "雾岛来电",
+    "format": "竖屏 AI 短剧",
+    "aspectRatio": "9:16",
+    "defaultModelId": "seedance-1-0-pro",
+    "defaultResolution": "1080p",
+    "episodeCount": 12
+  },
+  "episodes": [
+    {
+      "id": "ep-001",
+      "number": 1,
+      "title": "凌晨三点的来电",
+      "dramaticGoal": "用一通不可能存在的电话，把观众钉在前 3 秒",
+      "logline": "守岛接线员林晚在凌晨三点接到已故姐姐的号码，电话那头只说了一句：快离开岛。",
+      "synopsis": "台风夜，守岛气象站的接线员林晚值最后一班岗。凌晨三点，座机响起——来电显示是三年前坠海的姐姐。电话那头的海浪声里，姐姐只说：快离开岛。林晚挂断，铃声再次响起，这次来电人写着她自己的名字。",
+      "aspectRatio": "9:16",
+      "targetDurationSec": 75,
+      "hookAtSec": 3,
+      "filingNo": "微短剧备字〔2026〕第 0871 号",
+      "beats": [
+        {
+          "id": "beat-001",
+          "kind": "hook",
+          "scriptSceneRef": "S01",
+          "text": "凌晨三点，已故姐姐的号码在座机上亮起，海浪声从听筒里涌出。",
+          "keyframeIds": [
+            "kf-001"
+          ]
+        },
+        {
+          "id": "beat-002",
+          "kind": "development",
+          "scriptSceneRef": "S01",
+          "text": "林晚接起电话，听筒里只有一句：快离开岛。风声骤然变大。",
+          "keyframeIds": [
+            "kf-002",
+            "kf-003"
+          ]
+        },
+        {
+          "id": "beat-003",
+          "kind": "turn",
+          "scriptSceneRef": "S02",
+          "text": "她翻出三年前的通话记录，同一个号码，坠海当晚 23:47 也来过一通。",
+          "keyframeIds": [
+            "kf-004"
+          ]
+        },
+        {
+          "id": "beat-004",
+          "kind": "ending",
+          "scriptSceneRef": "S02",
+          "text": "她挂断电话。座机第三次响起，来电人：林晚（本机）。",
+          "keyframeIds": [
+            "kf-005",
+            "kf-006"
+          ]
+        }
+      ],
+      "keyframes": [
+        {
+          "id": "kf-001",
+          "code": "KF-01",
+          "beatId": "beat-001",
+          "imagePrompt": "人改：台灯暖光下重读台词，座机屏幕反光里带着泪",
+          "negativePrompt": "文字乱码，多余手指，现代智能手机",
+          "references": [
+            {
+              "assetId": "ch-linwan",
+              "name": "林晚",
+              "type": "character",
+              "weight": 0.8
+            },
+            {
+              "assetId": "sc-station",
+              "name": "气象站值班室",
+              "type": "scene",
+              "weight": 0.6
+            },
+            {
+              "assetId": "pr-phone",
+              "name": "老式座机",
+              "type": "prop",
+              "weight": 0.5
+            },
+            {
+              "assetId": "sty-fogisland",
+              "name": "雾岛冷调",
+              "type": "style",
+              "weight": 0.4
+            }
+          ],
+          "variants": [
+            {
+              "id": "iv-001a",
+              "seed": "s-1101",
+              "modelVersion": "seedream-4.0",
+              "requestParams": {
+                "resolution": "2K",
+                "styleRef": "fog-island-anchor"
+              },
+              "promptSnapshot": "",
+              "cost": 0.2,
+              "createdAt": "2026-10-17T02:00:00.000Z"
+            },
+            {
+              "id": "iv-001b",
+              "seed": "s-1102",
+              "modelVersion": "seedream-4.0",
+              "requestParams": {
+                "resolution": "2K",
+                "styleRef": "fog-island-anchor"
+              },
+              "promptSnapshot": "",
+              "createdAt": "2026-10-17T02:00:00.000Z",
+              "rejectedReason": "文字乱码"
+            },
+            {
+              "id": "iv-001c",
+              "seed": "s-1103",
+              "modelVersion": "seedream-4.0",
+              "requestParams": {
+                "resolution": "2K",
+                "styleRef": "fog-island-anchor"
+              },
+              "promptSnapshot": "",
+              "cost": 0.2,
+              "createdAt": "2026-10-17T02:00:00.000Z"
+            }
+          ],
+          "pickedVariantId": "iv-001a",
+          "status": "picked"
+        },
+        {
+          "id": "kf-002",
+          "code": "KF-02",
+          "beatId": "beat-002",
+          "imagePrompt": "竖屏近景：年轻女接线员握着听筒侧脸，耳机后海浪声可视化成淡蓝色波纹扩散，冷调侧光，瞳孔里映着仪器微光，胶片颗粒",
+          "negativePrompt": "手指异常，表情夸张",
+          "references": [
+            {
+              "assetId": "ch-linwan",
+              "name": "林晚",
+              "type": "character",
+              "weight": 0.9
+            },
+            {
+              "assetId": "sty-fogisland",
+              "name": "雾岛冷调",
+              "type": "style",
+              "weight": 0.4
+            }
+          ],
+          "variants": [
+            {
+              "id": "iv-002a",
+              "seed": "s-1201",
+              "modelVersion": "seedream-4.0",
+              "requestParams": {
+                "resolution": "2K",
+                "styleRef": "fog-island-anchor"
+              },
+              "promptSnapshot": "",
+              "cost": 0.2,
+              "createdAt": "2026-10-17T02:00:00.000Z"
+            },
+            {
+              "id": "iv-002b",
+              "seed": "s-1202",
+              "modelVersion": "seedream-4.0",
+              "requestParams": {
+                "resolution": "2K",
+                "styleRef": "fog-island-anchor"
+              },
+              "promptSnapshot": "",
+              "cost": 0.2,
+              "createdAt": "2026-10-17T02:00:00.000Z"
+            },
+            {
+              "id": "iv-002c",
+              "seed": "s-1203",
+              "modelVersion": "seedream-4.0",
+              "requestParams": {
+                "resolution": "2K",
+                "styleRef": "fog-island-anchor"
+              },
+              "promptSnapshot": "",
+              "createdAt": "2026-10-17T02:00:00.000Z",
+              "rejectedReason": "角色漂移"
+            }
+          ],
+          "status": "review"
+        },
+        {
+          "id": "kf-003",
+          "code": "KF-03",
+          "beatId": "beat-002",
+          "imagePrompt": "竖屏大远景：台风夜的气象站孤岛全貌，探照灯束刺进雨幕，海面泛起不自然的青绿色磷光，闪电定格瞬间",
+          "references": [
+            {
+              "assetId": "sc-island",
+              "name": "雾岛全貌",
+              "type": "scene",
+              "weight": 0.8
+            },
+            {
+              "assetId": "sty-fogisland",
+              "name": "雾岛冷调",
+              "type": "style",
+              "weight": 0.5
+            }
+          ],
+          "variants": [],
+          "status": "generating"
+        },
+        {
+          "id": "kf-004",
+          "code": "KF-04",
+          "beatId": "beat-003",
+          "imagePrompt": "竖屏俯拍：泛黄的通话记录单摊在桌面，红笔圈出 23:47，旁边是姐姐的旧照片，台灯暖光与窗外冷蓝雨夜对比",
+          "negativePrompt": "文字乱码",
+          "references": [
+            {
+              "assetId": "ch-linwan",
+              "name": "林晚",
+              "type": "character",
+              "weight": 0.3
+            },
+            {
+              "assetId": "pr-records",
+              "name": "通话记录单",
+              "type": "prop",
+              "weight": 0.7
+            }
+          ],
+          "variants": [
+            {
+              "id": "iv-004a",
+              "seed": "s-1401",
+              "modelVersion": "seedream-4.0",
+              "requestParams": {
+                "resolution": "2K",
+                "styleRef": "fog-island-anchor"
+              },
+              "promptSnapshot": "",
+              "cost": 0.2,
+              "createdAt": "2026-10-17T02:00:00.000Z"
+            },
+            {
+              "id": "iv-004b",
+              "seed": "s-1402",
+              "modelVersion": "seedream-4.0",
+              "requestParams": {
+                "resolution": "2K",
+                "styleRef": "fog-island-anchor"
+              },
+              "promptSnapshot": "",
+              "cost": 0.2,
+              "createdAt": "2026-10-17T02:00:00.000Z"
+            }
+          ],
+          "pickedVariantId": "iv-004a",
+          "status": "picked"
+        },
+        {
+          "id": "kf-005",
+          "code": "KF-05",
+          "beatId": "beat-004",
+          "imagePrompt": "竖屏特写：林晚的手指悬在座机挂断键上方微微颤抖，指节发白，背景来电灯第三次亮起，红色警示光",
+          "references": [
+            {
+              "assetId": "ch-linwan",
+              "name": "林晚",
+              "type": "character",
+              "weight": 0.7
+            }
+          ],
+          "variants": [],
+          "status": "draft"
+        },
+        {
+          "id": "kf-006",
+          "code": "KF-06",
+          "beatId": "beat-004",
+          "imagePrompt": "MCP 写入：来电屏极特写，屏幕反光里第二个身影",
+          "negativePrompt": "文字乱码，多余肢体",
+          "references": [
+            {
+              "assetId": "pr-phone",
+              "name": "老式座机",
+              "type": "prop",
+              "weight": 0.8
+            },
+            {
+              "assetId": "sty-fogisland",
+              "name": "雾岛冷调",
+              "type": "style",
+              "weight": 0.5
+            }
+          ],
+          "variants": [],
+          "status": "draft",
+          "shotSize": "ECU"
+        }
+      ],
+      "segments": [
+        {
+          "id": "seg-001",
+          "code": "SEG-01",
+          "fromKeyframeId": "kf-001",
+          "fromVariantId": "iv-001a",
+          "toKeyframeId": "kf-002",
+          "videoPrompt": "镜头缓缓推近来电屏，『姐姐』两个字在雨夜微光里明灭；话机铃声震动带动桌面水洼涟漪，冷蓝光里一缕暖黄台灯光忽明忽暗",
+          "modelId": "seedance-1-0-pro",
+          "resolution": "1080p",
+          "duration": 5,
+          "billedAttempts": 4,
+          "failedAttempts": 1,
+          "cost": 14.68,
+          "variants": [
+            {
+              "id": "vv-001a",
+              "seed": "s-2101",
+              "modelVersion": "seedance-1-0-pro",
+              "requestParams": {
+                "resolution": "1080p",
+                "duration": 5,
+                "camerafixed": false
+              },
+              "promptSnapshot": "镜头缓缓推近来电屏…",
+              "cost": 3.67,
+              "createdAt": "2026-10-17T02:00:00.000Z"
+            },
+            {
+              "id": "vv-001b",
+              "seed": "s-2102",
+              "modelVersion": "seedance-1-0-pro",
+              "requestParams": {
+                "resolution": "1080p",
+                "duration": 5,
+                "camerafixed": true
+              },
+              "promptSnapshot": "镜头缓缓推近来电屏…",
+              "cost": 3.67,
+              "createdAt": "2026-10-17T02:00:00.000Z",
+              "rejectedReason": "镜头漂移"
+            }
+          ],
+          "pickedVariantId": "vv-001a",
+          "dialogueStrategy": "mute",
+          "status": "ready",
+          "cues": [
+            {
+              "id": "cue-001",
+              "kind": "ambience",
+              "label": "雨声敲窗",
+              "offsetSec": 0,
+              "durationSec": 5,
+              "provider": "MiniMax",
+              "prompt": "持续细密的秋雨打在铁皮窗沿，远处闷雷",
+              "cost": 0.6
+            },
+            {
+              "id": "cue-002",
+              "kind": "music",
+              "label": "低频悬念铺垫",
+              "offsetSec": 1,
+              "durationSec": 4,
+              "provider": "Suno",
+              "prompt": "低频弦乐渐入，不安，60bpm",
+              "cost": 0.5
+            }
+          ]
+        },
+        {
+          "id": "seg-002",
+          "code": "SEG-02",
+          "fromKeyframeId": "kf-002",
+          "toKeyframeId": "kf-003",
+          "videoPrompt": "林晚侧脸贴着听筒，海浪声可视化波纹从耳机后扩散；镜头环绕半周，窗外闪电两次劈亮雨幕，她瞳孔收缩",
+          "promptStale": true,
+          "modelId": "seedance-1-0-pro",
+          "resolution": "1080p",
+          "duration": 10,
+          "dialogue": "快……离开岛。",
+          "dialogueStrategy": "tts-post",
+          "billedAttempts": 1,
+          "failedAttempts": 0,
+          "cost": 10.78,
+          "variants": [
+            {
+              "id": "vv-002a",
+              "seed": "s-2201",
+              "modelVersion": "seedance-1-0-pro",
+              "requestParams": {
+                "resolution": "1080p",
+                "duration": 10,
+                "camerafixed": false
+              },
+              "promptSnapshot": "林晚侧脸贴着听筒…",
+              "cost": 10.78,
+              "createdAt": "2026-10-17T02:00:00.000Z"
+            }
+          ],
+          "cues": [
+            {
+              "id": "cue-003",
+              "kind": "voice",
+              "label": "「快……离开岛。」",
+              "offsetSec": 4,
+              "durationSec": 2.5,
+              "provider": "ElevenLabs",
+              "prompt": "年轻女声，气声，极度压抑的恐惧",
+              "cost": 1.2
+            },
+            {
+              "id": "cue-004",
+              "kind": "sfx",
+              "label": "电话忙音骤停",
+              "offsetSec": 0,
+              "durationSec": 1,
+              "provider": "MiniMax",
+              "cost": 0.3
+            },
+            {
+              "id": "cue-005",
+              "kind": "music",
+              "label": "弦乐骤紧",
+              "offsetSec": 5,
+              "durationSec": 5,
+              "provider": "Suno",
+              "cost": 0.5
+            }
+          ],
+          "status": "stale"
+        },
+        {
+          "id": "seg-003",
+          "code": "SEG-03",
+          "fromKeyframeId": "kf-003",
+          "toKeyframeId": "kf-004",
+          "videoPrompt": "无人机视角急速下降冲向气象站，探照灯束扫过镜头，青绿色磷光在海面下流动汇聚成漩涡图案",
+          "modelId": "seedance-1-0-pro",
+          "resolution": "1080p",
+          "duration": 5,
+          "billedAttempts": 0,
+          "failedAttempts": 2,
+          "cost": 0,
+          "variants": [],
+          "dialogueStrategy": "mute",
+          "status": "failed"
+        },
+        {
+          "id": "seg-004",
+          "code": "SEG-04",
+          "fromKeyframeId": "kf-004",
+          "toKeyframeId": "kf-005",
+          "videoPrompt": "俯拍桌面，林晚的手指抚过泛黄记录单上的红圈，纸页边缘被穿堂风掀动；镜头缓摇至旧照片，照片里的姐姐笑容渐渐与雨痕重叠",
+          "modelId": "seedance-1-0-pro",
+          "resolution": "1080p",
+          "duration": 10,
+          "billedAttempts": 1,
+          "failedAttempts": 0,
+          "cost": 7.35,
+          "variants": [
+            {
+              "id": "vv-seg-004-1792253605481",
+              "seed": "s-7849",
+              "modelVersion": "Seedance 1.0 Pro",
+              "requestParams": {
+                "resolution": "1080p",
+                "duration": 10
+              },
+              "promptSnapshot": "俯拍桌面，林晚的手指抚过泛黄记录单上的红圈，纸页边缘被穿堂风掀动；镜头缓摇至旧照片，照片里的姐姐笑容渐渐与雨痕重叠",
+              "cost": 7.35,
+              "createdAt": "2026-10-17T16:13:25.481Z"
+            }
+          ],
+          "dialogueStrategy": "mute",
+          "status": "ready",
+          "pickedVariantId": "vv-seg-004-1792253605481"
+        },
+        {
+          "id": "seg-005",
+          "code": "SEG-05",
+          "fromKeyframeId": "kf-005",
+          "toKeyframeId": "kf-006",
+          "videoPrompt": "手指悬停颤抖后按下挂断，铃声戛然而止一拍寂静，随即来电灯第三次爆亮成红色，镜头急推至来电屏",
+          "promptStale": true,
+          "modelId": "seedance-2-5",
+          "resolution": "1080p",
+          "duration": 15,
+          "dialogue": "（电话那头，自己的声音）喂……我是林晚。",
+          "dialogueStrategy": "native",
+          "billedAttempts": 0,
+          "failedAttempts": 0,
+          "cost": 0,
+          "variants": [],
+          "cues": [
+            {
+              "id": "cue-006",
+              "kind": "voice",
+              "label": "音画同生：来电人台词（含口型）",
+              "offsetSec": 8,
+              "durationSec": 5,
+              "provider": "火山方舟 Seedance 2.5",
+              "cost": 0
+            }
+          ],
+          "status": "draft"
+        }
+      ],
+      "versions": [
+        {
+          "id": "epv-001",
+          "label": "v1 初剪",
+          "createdAt": "2026-10-16T20:00:00.000Z",
+          "basis": [
+            "导演看片记录：前 3 秒钩子成立，但 4–9 秒信息密度塌陷",
+            "审片会意见：台词与画面的恐惧递进不同步"
+          ],
+          "problems": [
+            "开场雨声铺底太满，座机铃声没有破口",
+            "KF-02 表情靠文字描述，成片面部微表情僵硬",
+            "第二拍情绪转折晚 1.8 秒，观众流失点"
+          ],
+          "changes": [
+            "雨声音量 -6dB，前 3 秒只留铃声与呼吸声",
+            "KF-02 重挂林晚三视图（权重 0.9），重写生图提示词强调瞳孔微光",
+            "SEG-02 剪掉 1.8 秒空镜，弦乐骤紧提前"
+          ],
+          "metrics": [
+            "重生成 11 次定稿（预算 15 内）",
+            "前 3 秒信息密度评分 6.2 → 8.7（VLM 盲评）",
+            "台词口型同步率 0 帧偏移",
+            "该版花费：火山方舟 ¥25.46 · MiniMax ¥1.7 · ElevenLabs ¥1.2"
+          ],
+          "costByProvider": {
+            "火山方舟": 25.46,
+            "MiniMax": 1.7,
+            "ElevenLabs": 1.2,
+            "Suno": 1
+          }
+        },
+        {
+          "id": "epv-002",
+          "label": "v2 悬念强化",
+          "createdAt": "2026-10-17T03:00:00.000Z",
+          "basis": [
+            "v1 定稿后导演复看：结尾来电屏反转不够狠"
+          ],
+          "problems": [
+            "SEG-05 结尾镜头太长，反转延迟 4 秒"
+          ],
+          "changes": [
+            "拆 15s 段为 10s+5s，反转帧提前",
+            "KF-06 增加电流噪点质感与身后第二身影"
+          ],
+          "metrics": [
+            "待生成——v2 变更对齐后 2 段置待重制",
+            "预计增费 ¥7.3（档位吸附 5s×2）"
+          ],
+          "costByProvider": {},
+          "isCurrent": true
+        }
+      ]
+    }
+  ]
+}
