@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=1080, height=1920">
+<style>
+  body { margin:0; background:#0a0e14; font-family: sans-serif; }
+  .phone { position:absolute; left:330px; top:760px; width:420px; height:640px; border-radius:36px;
+           background:linear-gradient(180deg,#1a2230,#0d1420); box-shadow:0 0 120px 30px rgba(120,160,255,.15); }
+  .screen { position:absolute; inset:20px; border-radius:24px; background:#05070c;
+            display:flex; align-items:center; justify-content:center; flex-direction:column; gap:24px; }
+  .name { color:#c9d6ff; font-size:56px; letter-spacing:8px; opacity:calc(0.2 + 0.8*min(1,t/1.2)); }
+  .time { color:#5a6a8a; font-size:30px; letter-spacing:4px; opacity:calc(t<1 ? t : 1); }
+  .glow { position:absolute; left:330px; top:760px; width:420px; height:640px; border-radius:36px;
+          background:radial-gradient(circle at 50% 45%, rgba(255,80,80,calc(0.35*max(0,(t-3)/3))), transparent 65%); }
+</style>
+</head>
+<body>
+  <div class="phone"><div class="screen">
+    <div class="time">03:00</div>
+    <div class="name">姐 姐</div>
+  </div></div>
+  <div class="glow"></div>
+<script type="module">
+window.film = { frame(t) { document.title = String(t); } };
+</script>
+</body>
+</html>

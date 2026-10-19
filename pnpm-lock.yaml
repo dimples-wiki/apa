@@ -179,6 +179,9 @@ catalogs:
     next-themes:
       specifier: ^0.4.6
       version: 0.4.6
+    openfilm:
+      specifier: ^0.2.0
+      version: 0.2.0
     radix-ui:
       specifier: ^1.8.1
       version: 1.8.1
@@ -233,6 +236,9 @@ importers:
       hono:
         specifier: ^4.9.0
         version: 4.13.13
+      openfilm:
+        specifier: 'catalog:'
+        version: 0.2.0
       ws:
         specifier: 'catalog:'
         version: 8.22.0
@@ -2457,6 +2463,11 @@ packages:
     resolution: {integrity: sha512-5vvB5+W7ePv+p3uqxi+RcW1XAzLW0/hxt3/4X4Lc4qHudzOhmBiBwOY6DRob4WnanAEGvNcLjF+KNOufrUoEQw==}
     engines: {node: '>=12.20.0'}
 
+  openfilm@0.2.0:
+    resolution: {integrity: sha512-w1yW6dRPxFqOxm5rRLpRckJp93A/cUO/174RVzqvoQ4XhwWn1l4pt6aGxfMg0UJlnAm5FjfJMESpUOM0rSC6Hg==}
+    engines: {node: '>=22.2'}
+    hasBin: true
+
   oxfmt@0.73.0:
     resolution: {integrity: sha512-Ke4xbpuzqIBP4bkd48q815RhqWNJqOBzxVA9199M4qcF0y0LtpUv7UTg1dJ5ea6jw0RBUDZvX3qOUMNmmxfxbw==}
     engines: {node: ^20.19.0 || >=22.12.0}
@@ -2499,6 +2510,11 @@ packages:
   picomatch@4.0.7:
     resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
     engines: {node: '>=12'}
+
+  playwright-core@1.61.1:
+    resolution: {integrity: sha512-h7Qlt6m4REp25qvIdvbDtVmD4LqVXfpRxhORv9L0jzETM05p4fuPJ3dKyuSXQxDSbXnmS79HAgi9589lGSpLkg==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   pngjs@7.0.0:
     resolution: {integrity: sha512-LKWqWJRhstyYo9pGvgor/ivk2w94eSjE3RGVuzLGlr3NmD8bf7RcYGze1mNdEHRP6TRP6rMuDHk5t44hnTRyow==}
@@ -4634,6 +4650,10 @@ snapshots:
 
   obug@3.0.0: {}
 
+  openfilm@0.2.0:
+    dependencies:
+      playwright-core: 1.61.1
+
   oxfmt@0.73.0(vite-plus@1.2.0(@types/node@24.19.2)(@vitest/ui@5.0.4)(jiti@2.7.0)(typescript@7.0.2)(yaml@2.9.1)):
     dependencies:
       tinypool: 2.2.0
@@ -4697,6 +4717,8 @@ snapshots:
   picocolors@1.1.1: {}
 
   picomatch@4.0.7: {}
+
+  playwright-core@1.61.1: {}
 
   pngjs@7.0.0: {}
 

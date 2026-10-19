@@ -1,4 +1,4 @@
-import { Clapperboard, FolderKanban, Mountain, Settings, Shirt, Users } from "lucide-react";
+import { Clapperboard, Film, Mountain, Settings, Shirt, Users, Wrench } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { NavLink, useLocation } from "react-router";
 import { useApi } from "@/hooks/use-api";
@@ -27,13 +27,16 @@ interface NavItem {
 }
 
 function useNavItems(): NavItem[] {
+  return [{ title: "影片库", to: "/films", icon: Film, count: undefined }];
+}
+
+function useExperimentalNavItems(): NavItem[] {
   const projects = useApi(api.projects);
   const actors = useApi(api.actors);
   const scenes = useApi(api.scenes);
   const costumes = useApi(api.costumes);
-
   return [
-    { title: "项目", to: "/projects", icon: FolderKanban, count: projects.data?.length },
+    { title: "实验工作台", to: "/projects", icon: Wrench, count: projects.data?.length },
     { title: "演员", to: "/actors", icon: Users, count: actors.data?.length },
     { title: "场景", to: "/scenes", icon: Mountain, count: scenes.data?.length },
     { title: "服饰", to: "/costumes", icon: Shirt, count: costumes.data?.length },
@@ -66,6 +69,7 @@ function NavRow({ item, active }: { item: NavItem; active: boolean }) {
 
 export function AppSidebar() {
   const items = useNavItems();
+  const experimental = useExperimentalNavItems();
   const { pathname } = useLocation();
 
   return (
@@ -88,11 +92,21 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>创作</SidebarGroupLabel>
+          <SidebarGroupLabel>制作</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
-                <NavRow key={item.to} item={item} active={pathname === item.to} />
+                <NavRow key={item.to} item={item} active={pathname.startsWith(item.to)} />
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>实验（旧工作台）</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {experimental.map((item) => (
+                <NavRow key={item.to} item={item} active={pathname.startsWith(item.to)} />
               ))}
             </SidebarMenu>
           </SidebarGroupContent>

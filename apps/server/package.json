@@ -24,6 +24,7 @@
     "@hono/node-server": "^1.14.0",
     "commander": "^14.0.0",
     "hono": "^4.9.0",
+    "openfilm": "catalog:",
     "ws": "catalog:"
   },
   "devDependencies": {

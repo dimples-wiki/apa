@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { WebSocketServer } from "ws";
@@ -10,6 +11,14 @@ import { actors, costumes, projects, scenes } from "./data.ts";
 import { loadState, loadOverrides, mutate, scheduleCompletion, toggleLock, writeManual } from "./store.ts";
 import { runLook } from "./look.ts";
 import { bridgeMessage, buildMcpApp, registerBridgeSocket } from "./mcp.ts";
+import {
+  ASSET_CATEGORIES,
+  assetsDir,
+  filmDir,
+  listAssets,
+  listFilms,
+  openFilm,
+} from "./films.ts";
 
 // monorepo 开发态优先用 apps/web/dist（最新构建）；npm 发布包内无该目录时回落打包快照
 const devWebDist = fileURLToPath(new URL("../../web/dist", import.meta.url));
@@ -24,6 +33,54 @@ export function startServer(opts: { port: number; hostname: string }) {
   app.get("/api/actors", (c) => c.json(actors));
   app.get("/api/scenes", (c) => c.json(scenes));
   app.get("/api/costumes", (c) => c.json(costumes));
+
+  // ── OpenFilm 发行层：影片库 + 素材分类 + 内嵌 Studio ──
+  app.get("/api/films", (c) => c.json({ films: listFilms(), categories: ASSET_CATEGORIES }));
+  app.post("/api/films/open", async (c) => {
+    const b = await c.req.json<{ name: string }>();
+    const name = (b.name ?? "").trim();
+    if (!name || /[\\/]/.test(name)) return c.json({ error: "name 必填且不能含路径分隔符" }, 400);
+    try {
+      const r = await openFilm(name);
+      return c.json({ ok: true, ...r });
+    } catch (e) {
+      return c.json({ ok: false, error: (e as Error).message }, 500);
+    }
+  });
+  app.get("/api/films/:name/assets", (c) => {
+    const name = c.req.param("name");
+    if (!existsSync(filmDir(name))) return c.json({ error: "影片不存在" }, 404);
+    return c.json({ assets: listAssets(name) });
+  });
+  app.post("/api/films/:name/assets", async (c) => {
+    const name = c.req.param("name");
+    const category = (c.req.query("category") ?? "image") as (typeof ASSET_CATEGORIES)[number];
+    if (!ASSET_CATEGORIES.includes(category))
+      return c.json({ error: `category 必须是 ${ASSET_CATEGORIES.join("/")}` }, 400);
+    if (!existsSync(filmDir(name))) return c.json({ error: "影片不存在" }, 404);
+    const body = await c.req.parseBody();
+    const file = body["file"];
+    if (!(file instanceof File)) return c.json({ error: "multipart 字段 file 必填" }, 400);
+    const safe = file.name.replace(/[\\/]/g, "_");
+    const dir = assetsDir(name, category);
+    writeFileSync(join(dir, safe), Buffer.from(await file.arrayBuffer()));
+    return c.json({ ok: true, file: `assets/${category}/${safe}` });
+  });
+  // 素材文件预览（供素材栏缩略/试听）
+  app.get("/api/films/:name/asset-file/*", (c) => {
+    const name = c.req.param("name");
+    const rel = c.req.path.split("/asset-file/")[1] ?? "";
+    if (rel.includes("..")) return c.text("bad path", 400);
+    const fp = join(filmDir(name), rel);
+    if (!existsSync(fp)) return c.text("not found", 404);
+    const mime =
+      { ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp",
+        ".gif": "image/gif", ".mp4": "video/mp4", ".webm": "video/webm", ".mp3": "audio/mpeg",
+        ".wav": "audio/wav", ".vtt": "text/vtt" }[
+        fp.slice(fp.lastIndexOf("."))
+      ] ?? "application/octet-stream";
+    return c.body(readFileSync(fp), 200, { "content-type": mime });
+  });
 
   // ── 工作台 studio API：片协议单一真源（UI by=ui；agent 走 CLI/MCP by=agent 受 locks 守卫）──
   app.get("/api/studio/state", (c) => c.json(loadState()));

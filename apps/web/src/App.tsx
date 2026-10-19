@@ -10,12 +10,31 @@ import { ScenesPage } from "@/pages/scenes-page";
 import { SettingsPage } from "@/pages/settings-page";
 
 const ProjectStudioPage = lazy(() => import("@/pages/project-studio"));
+const FilmsPage = lazy(() => import("@/pages/films-page"));
+const FilmStudioPage = lazy(() => import("@/pages/film-studio-page"));
 
 export default function App() {
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>
-        {/* 创作工作台：全屏独立布局（剪辑软件形态，无侧栏/底栏） */}
+        {/* OpenFilm 发行层：影片库（前置项目管理）+ 制作界面（素材栏 + 内嵌 Studio） */}
+        <Route
+          path="/films"
+          element={
+            <Suspense fallback={null}>
+              <FilmsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/studio/:name"
+          element={
+            <Suspense fallback={null}>
+              <FilmStudioPage />
+            </Suspense>
+          }
+        />
+        {/* 实验工作台：全屏独立布局（无侧栏/底栏） */}
         <Route
           path="/projects/:id/studio"
           element={
@@ -25,7 +44,7 @@ export default function App() {
           }
         />
         <Route element={<AppShell />}>
-          <Route path="/" element={<Navigate to="/projects" replace />} />
+          <Route path="/" element={<Navigate to="/films" replace />} />
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/actors" element={<ActorsPage />} />
           <Route path="/scenes" element={<ScenesPage />} />
